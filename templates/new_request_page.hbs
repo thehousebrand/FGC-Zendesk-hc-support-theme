@@ -1,0 +1,344 @@
+<div class="container-divider"></div>
+<div class="container">
+  <div class="sub-nav">
+    {{breadcrumbs}}
+    <div class="search-container">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" focusable="false" viewBox="0 0 12 12" class="search-icon" aria-hidden="true">
+        <circle cx="4.5" cy="4.5" r="4" fill="none" stroke="currentColor"/>
+        <path stroke="currentColor" stroke-linecap="round" d="M11 11L7.5 7.5"/>
+      </svg>
+      {{search submit=false}}
+    </div>
+  </div>
+
+  <h1 id="main-title">
+    {{#if signed_in}}{{t 'submit_a_request'}}{{else}}How can we help you?{{/if}}
+  </h1>
+
+  <div id="main-content" class="form">
+    <div id="new-request-form"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { renderNewRequestForm } from "new-request-form";
+
+  const container = document.getElementById("new-request-form");
+
+  const settings = {{json settings}};
+  const formSettings = {{json new_request_form}};
+  const loggedin = !(HelpCenter.user.role == "anonymous" || HelpCenter.user.role == "end_user");
+  const defaultFormValue = "6207954525583";
+  const urlParams = new URLSearchParams(window.location.search);
+  const ticketFormId = formSettings.ticket_form_field.value ? formSettings.ticket_form_field.value.toString() : null;
+
+  
+  // Filter and update settings based on login status (could add role filtering here too if moved from below)
+  if (!loggedin) {
+    if (ticketFormId !== defaultFormValue) {
+      const currentUrl = window.location.href; // Get the current URL
+      const redirectUrl = `${currentUrl.split('?')[0]}?ticket_form_id=${defaultFormValue}`; // Append query string
+      window.location.href = redirectUrl; // Redirect the user
+    }
+    const defaultOption = formSettings.ticket_form_field.options.find(
+      option => option.value === parseInt(defaultFormValue) // Match by value
+    );
+
+    if (defaultOption) {
+  		//update the form title
+  		document.querySelector("#main-title").textContent = "How can we help you?"
+  		//update the form settings to only include these options
+      formSettings.ticket_form_field.options = [defaultOption];
+    }
+  }
+
+  // Function to dynamically update ticket fields based on ticket_form_id
+  function updateTicketFields(ticketFormId) {
+    switch (ticketFormId) {
+      case "6207954525583": // Default Ticket Form
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = ""; // No default value
+          }
+  				if (field.name === "request[custom_fields][12899775292815]") {
+  					field.hidden = loggedin;
+  				}
+          if (field.name === "request[description]") {
+            field.description = "Please enter the details of your enquiry.";
+          }
+        });
+        break;
+
+      case "12805668413199": // Website update request
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = "Web update request"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          if (field.name === "request[description]") {
+            field.description = "Please enter the details of your request, including any copy updates (or attach below).";
+          }
+        });
+        break;
+
+      case "12805859163151": // Leave request
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = "Leave request"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          if (field.name === "request[description]") {
+            field.value = "Leave request information"; // Set default text
+          }
+        });
+        if (formSettings.attachments_field) {
+          formSettings.attachments_field.hidden = true; // Hide attachments
+        }
+        break;
+
+      case "12806312120719": // Change booking availability request
+      case "12806382928911": // Change practice schedule request
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = ticketFormId === "12806312120719"
+              ? "Change booking availability request"
+              : "Change practice schedule request"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          if (field.name === "request[description]") {
+            field.description = "Please enter the details of your request, including the reason for any change(s).";
+          }
+        });
+        break;
+
+      case "12875023936015": // Incident report
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[description]") {
+            field.description = "Please enter all details of the incident, including adding any photos as attachments.";
+          }
+        });
+        break;
+
+      case "12846049339023": // Building access card request
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = "Building access card request"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          if (field.name === "request[description]") {
+            field.value = "Building access card request"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+        });
+        if (formSettings.attachments_field) {
+          formSettings.attachments_field.required = true; // Enforce mandatory attachment
+          formSettings.attachments_field.label = "Attach your signed building access card request form here. *";
+        }
+        break;
+  
+  		case "13017899435407": // WWCC submission
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = "WWCC submission"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          if (field.name === "request[description]") {
+            field.value = "WWCC submission request"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+        });
+        if (formSettings.attachments_field) {
+          formSettings.attachments_field.required = true; // Enforce mandatory attachment
+          formSettings.attachments_field.label = "Attach your WWCC here. *";
+        }
+        break;
+
+      case "13068221569295": // Photoshoot release waiver submission
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = "Photoshoot release waiver submission"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          if (field.name === "request[description]") {
+            field.value = "Photoshoot release waiver submission"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+        });
+        if (formSettings.attachments_field) {
+          formSettings.attachments_field.required = true; // Enforce mandatory attachment
+          formSettings.attachments_field.label = "Attach your release form here. *";
+        }
+        break;
+  
+  		case "13128405962639": // Feedback form
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = "Feedback form submission"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          if (field.name === "request[description]") {
+            field.description = "Please enter the details of your feedback here, including any recommendations.";
+          }
+        });
+        break;
+
+      case "12845180294543": // Induction acknowledgement
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = "Induction acknowledgement"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          if (field.name === "request[description]") {
+            field.value = "Induction acknowledgement"; // Set default value
+            field.description = "Please enter any details below.";
+          }
+        });
+        if (formSettings.attachments_field) {
+          formSettings.attachments_field.hidden = true; // Hide attachments
+        }
+        break;
+
+      default:
+        // No customization for other ticket_form_ids
+        break;
+    }
+  }
+
+  function waitForFormRendering(formContainer, callback, interval = 200, timeout = 5000) {
+    const startTime = Date.now();
+    function checkForm() {
+      if (formContainer) {
+        const formElement = formContainer.querySelector('[data-garden-id="forms.field"]');
+        if (formElement) {
+          callback(); // Call the callback function (e.g., hideFields)
+          return;
+        }
+      }
+      if (Date.now() - startTime > timeout) {
+        console.error("Form rendering timeout exceeded.");
+        return;
+      }
+      setTimeout(checkForm, interval);
+    }
+    checkForm();
+  }
+
+  function hideSuggestedArticles() {
+    // Create a <style> element
+    const style = document.createElement('style');
+    style.type = 'text/css';
+
+    // Add CSS rule to hide the element
+    style.innerHTML = '[data-test-id="suggested-articles"] { display: none !important; }';
+
+    // Append the <style> element to the <head>
+    document.head.appendChild(style);
+  }
+
+  function requireAttachments() {
+    // Find the form with the required ticket_form_id
+    const form = document.querySelector('form[action="/hc/en-au/requests"]')?.closest('form');
+    if (!form) return;
+
+    // Find the file input and the required checkbox
+    const fileInput = form.querySelector('input[type="file"]');
+    const requiredCheckbox = form.querySelector('input[type="checkbox"]');
+  	const requiredCheckboxLabel = requiredCheckbox.parentElement.querySelector('label[data-garden-id="forms.checkbox_label"]');
+		
+    if (!fileInput || !requiredCheckbox || !requiredCheckboxLabel) return;
+		requiredCheckbox.style.display = "none";
+  	requiredCheckboxLabel.style.display = "none";
+  	
+    // Helper to update checkbox state
+    function updateCheckbox(mutationsList) {
+      mutationsList.forEach(function (mutation) {
+    		if (mutation.type == 'childList') {
+          let checked;
+          try {
+  					const input = document.querySelector('input[name="request[attachments][]"]');
+            const value = JSON.parse(input.value);
+  					checked = !!value;
+          } catch (e) {
+            checked = false;
+          }
+					requiredCheckbox.checked = checked;
+  				requiredCheckbox.value = (checked) ? "on": "off";
+  			}
+      });
+    }
+
+    // Listen for file input changes
+    fileInput.addEventListener('change', updateCheckbox);
+
+    // In case files are removed via UI (not just input), observe the file list
+    const fileList = form.querySelector('ul[data-garden-id="forms.file_list"]');
+    if (fileList) {
+      const observer = new MutationObserver(updateCheckbox);
+      observer.observe(fileList, { childList: true, subtree: true });
+    }
+  }
+
+  function hideFields() {
+    // Hide ticket fields
+    formSettings.ticket_fields.forEach(field => {
+      if (field.hidden) {
+        const fieldElement = document.querySelector(`[name="${field.name}"]`);
+        if (fieldElement) {
+          const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
+          if (parentElement) {
+            parentElement.style.display = "none"; // Hide the parent element
+  					if(field.name === "request[subject]") {
+  						hideSuggestedArticles();
+  					}
+          }
+        }
+      }
+    });
+
+    // Hide attachments field if marked as hidden
+    if (formSettings.attachments_field && formSettings.attachments_field.hidden) {
+      const attachmentsElement = document.querySelector(`[data-garden-id="forms.file_upload"]`);
+      if (attachmentsElement) {
+        const parentElement = attachmentsElement.closest('[data-garden-id="forms.field"]');
+        if (parentElement) {
+          parentElement.style.display = "none"; // Hide the parent element
+        }
+      }
+    }
+  	if (formSettings.attachments_field && formSettings.attachments_field.required) {
+  		requireAttachments();
+    }
+  }
+
+  // Apply dynamic updates to ticket fields
+  if (ticketFormId) {
+    updateTicketFields(ticketFormId);
+  }
+  
+  const props = {
+    requestForm: formSettings,
+    newRequestPath: {{json (page_path 'new_request')}},
+    parentId: {{json parent.id}},
+    parentIdPath: {{json parent.url}},
+    locale: {{json help_center.locale}},
+    baseLocale: {{json help_center.base_locale}},
+    hasAtMentions: {{json help_center.at_mentions_enabled}},
+    userRole: {{json user.role}},
+    userId: {{json user.id}},
+    brandId: {{json brand.id}},
+    organizations: {{json user.organizations}},
+    wysiwyg: true,
+    answerBotModal: {
+      answerBot: {{json answer_bot}},
+      hasRequestManagement: {{json help_center.request_management_enabled}},
+      isSignedIn: {{json signed_in}},
+      helpCenterPath: {{json (page_path 'help_center')}},
+      requestsPath: {{json (page_path 'requests')}},
+      requestPath: {{json (page_path 'request' id=answer_bot.request_id)}}
+    },
+  };
+
+  renderNewRequestForm(settings, props, container);
+  
+  waitForFormRendering(container, hideFields);
+</script>
