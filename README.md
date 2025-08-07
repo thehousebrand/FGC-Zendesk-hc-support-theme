@@ -1,0 +1,1 @@
+# FGC-Zendesk-hc-support-theme
