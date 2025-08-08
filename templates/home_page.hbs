@@ -11,7 +11,9 @@
       </svg>
     {{search submit=false instant=settings.instant_search class='search search-full'}}
     </div>
-    <div class="common-topics">Common topics: <span id="top-tags"></span></div>
+    {{#is brand.id 13442527968655}}
+    	<div class="common-topics">Common topics: <span id="top-tags"></span></div>
+    {{/is}}
   </div>
 </section>
 
