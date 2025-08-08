@@ -1,9 +1,9 @@
 {
   "name": "FGC support",
-  "author": "Zendesk",
-  "version": "4.3.6",
+  "author": "FGC",
+  "version": "1.0.1",
   "api_version": 4,
-  "default_locale": "en-us",
+  "default_locale": "en-au",
   "settings": [
     {
       "label": "colors_group_label",
