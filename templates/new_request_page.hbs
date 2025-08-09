@@ -12,7 +12,8 @@
   </div>
 
   <h1 id="main-title">
-    {{#if signed_in}}{{t 'submit_a_request'}}{{else}}How can we help you?{{/if}}
+    <!--{{#if signed_in}}{{t 'submit_a_request'}}{{else}}How can we help you?{{/if}}-->
+	{{#is brand.id 13442527968655}}{{t 'submit_a_request'}}{{else}}How can we help you?{{/is}}
   </h1>
 
   <div id="main-content" class="form">
