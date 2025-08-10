@@ -2,6 +2,7 @@
   "name": "FGC support",
   "author": "FGC",
   "version": "4.3.17",
+  "api_version": 4,
   "default_locale": "en-us",
   "settings": [
     {
