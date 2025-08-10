@@ -369,7 +369,24 @@
           throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         allTags.push(...(data.records || []));
-        nextUrl = data.meta?.has_more ? data.links?.next : null;
+
+        // Check if there are more items to fetch
+        if (data.meta?.has_more) {
+          // Use the next link if provided by the API
+          if (data.links?.next) {
+            nextUrl = data.links.next;
+          } else {
+            // Fallback: generate the next URL manually
+            // Parse the current URL to extract page information
+            const url = new URL(nextUrl, window.location.origin);
+            const searchParams = new URLSearchParams(url.search);
+            const pageSize = searchParams.get("page[size]") || 30;
+            const baseUrl = nextUrl.split("?")[0];
+            nextUrl = `${baseUrl}?page[size]=${pageSize}&page[after]=${data.meta.after_cursor}`;
+          }
+        } else {
+          nextUrl = null;
+        }
       }
 
       return allTags;
