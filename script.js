@@ -59,6 +59,7 @@
       const listItem = document.createElement('li');
       const link = document.createElement('a');
 
+      // FIX: add template string backticks
       link.href = `#${heading.id}`;
       link.textContent = heading.textContent;
       link.classList.add('toc-link');
@@ -94,7 +95,9 @@
         e.stopPropagation();
         e.target.classList.toggle('expanded');
         const nestedList = e.target.parentElement.querySelector('.nested');
-        if (nestedList) nestedList.classList.toggle('show');
+        if (nestedList) {
+          nestedList.classList.toggle('show');
+        }
       }
     });
   });
@@ -118,6 +121,7 @@
       });
     }
 
+    // Toggles expanded aria to collapsible elements
     const collapsible = document.querySelectorAll(".collapsible-nav, .collapsible-sidebar");
     collapsible.forEach((element) => {
       const toggle = element.querySelector(".collapsible-nav-toggle, .collapsible-sidebar-toggle");
@@ -127,6 +131,7 @@
       });
     });
 
+    // If multibrand search has more than 5 help centers or categories collapse the list
     const multibrandFilterLists = document.querySelectorAll(".multibrand-filter-list");
     multibrandFilterLists.forEach((filter) => {
       if (filter.children.length > 6) {
@@ -143,7 +148,7 @@
 
   const isPrintableChar = (str) => str.length === 1 && str.match(/^\S$/);
 
-  // Dropdown component
+  // Dropdown
   function Dropdown(toggle, menu) {
     this.toggle = toggle;
     this.menu = menu;
@@ -245,12 +250,14 @@
 
     outsideClickHandler: function (e) {
       if (this.isExpanded && !this.toggle.contains(e.target) && !e.composedPath().includes(this.menu)) {
-        this.dismiss(); this.toggle.focus();
+        this.dismiss();
+        this.toggle.focus();
       }
     },
 
     clickHandler: function (event) {
-      event.stopPropagation(); event.preventDefault();
+      event.stopPropagation();
+      event.preventDefault();
       if (this.isExpanded) { this.dismiss(); this.toggle.focus(); }
       else { this.open(); this.focusFirstMenuItem(); }
     },
@@ -358,7 +365,7 @@
     button.setAttribute("type", "button");
     button.setAttribute("aria-controls", inputId);
     button.classList.add("clear-button");
-    const buttonLabel = window.searchClearButtonLabelLocalized;
+    const buttonLabel = window.searchClearButtonLabelLocalized || "Clear";
     const icon = `<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' focusable='false' role='img' viewBox='0 0 12 12' aria-label='${buttonLabel}'><path stroke='currentColor' stroke-linecap='round' stroke-width='2' d='M3 9l6-6m0 6L3 3'/></svg>`;
     button.innerHTML = icon;
     button.addEventListener("click", clearSearchInput);
@@ -414,6 +421,7 @@
         if (commentContainerFormControls) commentContainerFormControls.style.display = "block";
         commentContainerTextarea.removeEventListener("focus", focusCommentContainerTextarea);
       });
+
       if (commentContainerTextarea.value !== "" && commentContainerFormControls) {
         commentContainerFormControls.style.display = "block";
       }
@@ -503,7 +511,7 @@
   });
 
   // ===========================
-  // CSRF helpers (de-duplicated)
+  // CSRF helpers (one version)
   // ===========================
   async function fetchCSRFToken() {
     try {
@@ -538,7 +546,7 @@
   }
 
   // ===========================
-  // Recent articles (unchanged)
+  // Recent articles
   // ===========================
   async function fetchRecentlyUpdatedArticles(limit = 5) {
     try {
@@ -561,7 +569,10 @@
 
   function displayRecentArticles(containerId, articles) {
     const container = document.getElementById(containerId);
-    if (!container) { console.error(`Container with ID "${containerId}" not found.`); return; }
+    if (!container) {
+      console.error(`Container with ID "${containerId}" not found.`);
+      return;
+    }
     container.innerHTML = '';
 
     articles.forEach(article => {
@@ -572,126 +583,129 @@
         const textContent = tempDiv.textContent || tempDiv.innerText || '';
         snippet = textContent.substring(0, 117) + (textContent.length > 117 ? '...' : '');
       }
+
       const articleHTML = `
         <article class="article-item">
           <div class="article-inner">
             <h3 class="article-title"><a href="${article.html_url}">${article.title}</a></h3>
             <p class="article-description">${snippet}</p>
           </div>
-        </article>`;
+        </article>
+      `;
       container.innerHTML += articleHTML;
     });
   }
 
   // ===========================
-  // Content Tags (NEW APPROACH)
+  // Content Tags (fixed)
   // ===========================
 
-  // Pull all content tags (handles pagination)
+  function getCurrentLocale() {
+    const htmlLang = (document.documentElement.getAttribute('lang') || '').toLowerCase().replace('_', '-');
+    if (htmlLang) return htmlLang;
+    const m = location.pathname.match(/\/hc\/([a-z]{2}(?:-[a-z]{2})?)\//i);
+    return (m && m[1].toLowerCase()) || 'en-us';
+  }
+
+  function buildNextCursorUrl(currentUrl, data) {
+    if (data.links && data.links.next) return data.links.next;
+    if (data.next_page) return data.next_page;
+    if (data.meta && data.meta.has_more && data.meta.after_cursor) {
+      const u = new URL(currentUrl, window.location.origin);
+      u.searchParams.set('page[after]', data.meta.after_cursor);
+      return u.pathname + u.search;
+    }
+    return null;
+  }
+
+  // Fetch ALL content tags (no CSRF needed)
   async function fetchAllContentTags() {
     try {
-      const csrfToken = await getCSRFTokenWithCache();
-      if (!csrfToken) throw new Error("Could not retrieve CSRF token. User may not be logged in.");
-
       const tags = [];
-      let url = `/api/v2/guide/content_tags?page[size]=50&sort=name`;
-
+      let url = `/api/v2/guide/content_tags?page[size]=100&sort=name`;
       while (url) {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }
-        });
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-        const data = await response.json();
-        if (Array.isArray(data.records)) tags.push(...data.records);
-
-        url = data.meta && data.meta.has_more
-          ? `/api/v2/guide/content_tags?page[after]=${encodeURIComponent(data.meta.after_cursor)}`
-          : null;
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+        if (!res.ok) throw new Error(`Tags HTTP ${res.status}`);
+        const data = await res.json();
+        const pageRecords = data.records || [];
+        tags.push(...pageRecords);
+        url = buildNextCursorUrl(url, data);
       }
-
-      return tags; // [{ id, name, ... }]
+      return tags;
     } catch (error) {
       console.error('Error fetching content tags:', error);
       return [];
     }
   }
 
-  // Count items tagged with a given content tag via Unified Search (cursor pagination)
-  async function countTaggedContent(tagId, locale) {
-    let total = 0;
-    let after = null;
-
+  // Fetch articles and paginate (no CSRF needed for GET)
+  async function fetchArticlesForTagCount(maxPages = 10) {
     try {
-      do {
-        const u = new URL(`/api/v2/guide/search`, location.origin);
-        if (locale) u.searchParams.set('filter[locales]', locale);
-        u.searchParams.set('query', `content_tags:${tagId}`);
-        if (after) u.searchParams.set('page[after]', after);
+      const locale = getCurrentLocale();
+      let url = `/api/v2/help_center/${locale}/articles?page[size]=100&sort_by=updated_at&sort_order=desc`;
+      const articles = [];
+      let pages = 0;
 
-        const res = await fetch(u.toString(), { credentials: 'same-origin' });
-        if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-
+      while (url && pages < maxPages) {
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+        if (!res.ok) throw new Error(`Articles HTTP ${res.status}`);
         const data = await res.json();
-        total += (data.results || []).length;
-        after = data.meta && data.meta.has_more ? data.meta.after_cursor : null;
-      } while (after);
-    } catch (e) {
-      console.error('Error counting tagged content:', e);
+        if (Array.isArray(data.articles)) articles.push(...data.articles);
+        url = buildNextCursorUrl(url, data);
+        pages++;
+      }
+      return articles;
+    } catch (error) {
+      console.error('Error fetching articles for tag count:', error);
+      return [];
     }
-
-    return total;
   }
 
-  // NEW: Fetch top content tags by querying Unified Search per tag
+  // Compute top content tags
   async function fetchTopContentTags(limit = 3) {
     try {
-      const LOCALE =
-        (window.HelpCenter && HelpCenter.user && HelpCenter.user.locale) ||
-        (document.documentElement && document.documentElement.lang) ||
-        'en-us';
-
       const allTags = await fetchAllContentTags();
       if (!allTags.length) return [];
 
-      const results = [];
-      const concurrency = 4;
-      let i = 0;
+      const tagMap = {};
+      allTags.forEach(t => { tagMap[t.id] = t; });
 
-      async function worker() {
-        while (i < allTags.length) {
-          const tag = allTags[i++];
-          const count = await countTaggedContent(tag.id, LOCALE);
-          if (count > 0) results.push({ id: tag.id, name: tag.name, count });
-        }
+      const articles = await fetchArticlesForTagCount(10); // ~1000 articles
+      if (!articles.length) return [];
+
+      const counts = {};
+      for (const a of articles) {
+        const ids = Array.isArray(a.content_tag_ids) ? a.content_tag_ids : [];
+        for (const id of ids) counts[id] = (counts[id] || 0) + 1;
       }
 
-      await Promise.all(Array.from({ length: concurrency }, worker));
+      const tagArray = Object.keys(counts).map(id => ({
+        id,
+        name: tagMap[id]?.name || 'Unknown tag',
+        count: counts[id]
+      }));
 
-      results.sort((a, b) => b.count - a.count);
-      return results.slice(0, limit);
+      tagArray.sort((a, b) => b.count - a.count);
+      return tagArray.slice(0, limit);
     } catch (error) {
       console.error('Error fetching top content tags:', error);
       return [];
     }
   }
 
-  // Display top tag links
+  // Render tag links (use content_tag_id and current locale)
   function displayTopTagLinks(containerId, tags) {
     const container = document.getElementById(containerId);
-    if (!container) { console.error(`Container with ID "${containerId}" not found.`); return; }
+    if (!container) {
+      console.error(`Container with ID "${containerId}" not found.`);
+      return;
+    }
+    const locale = getCurrentLocale();
     container.innerHTML = '';
-
-    const LOCALE =
-      (window.HelpCenter && HelpCenter.user && HelpCenter.user.locale) ||
-      (document.documentElement && document.documentElement.lang) ||
-      'en-us';
 
     tags.forEach(tag => {
       const link = document.createElement('a');
-      // Link to the tag’s collection; using tag ID avoids name collisions
-      link.href = `/hc/${LOCALE}/search?content_tags=${encodeURIComponent(tag.id)}`;
+      link.href = `/hc/${locale}/search?content_tag_id=${encodeURIComponent(tag.id)}`;
       link.textContent = tag.name;
       link.className = 'popular-tag-link';
       container.appendChild(link);
@@ -704,6 +718,7 @@
   // ===========================
   document.addEventListener('DOMContentLoaded', async () => {
     try {
+      // Recent articles
       const articles = await fetchRecentlyUpdatedArticles(5);
       if (articles && articles.length > 0) {
         displayRecentArticles('recent-articles', articles);
@@ -712,6 +727,7 @@
         if (container) container.innerHTML = '<p>No recently updated articles found.</p>';
       }
 
+      // Top tags
       const topTags = await fetchTopContentTags(3);
       if (topTags && topTags.length > 0) {
         displayTopTagLinks('top-tags', topTags);
