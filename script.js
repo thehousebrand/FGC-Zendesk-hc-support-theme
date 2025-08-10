@@ -1,5 +1,5 @@
 (function () {
-  'use strict';
+  'use strict'; 
 
   // Key map
   const ENTER = 13;

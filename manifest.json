@@ -1,12 +1,7 @@
 {
   "name": "FGC support",
   "author": "FGC",
-<<<<<<< HEAD
-  "version": "4.3.16",
-=======
-  "version": "4.3.11",
->>>>>>> parent of b5b532a (Update manifest.json)
-  "api_version": 4,
+  "version": "4.3.17",
   "default_locale": "en-us",
   "settings": [
     {
