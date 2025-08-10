@@ -504,13 +504,17 @@
     if (!tags || !tags.length) return;
 
     const frag = document.createDocumentFragment();
-    tags.forEach((tag) => {
+    tags.forEach((tag, index) => {
       const link = document.createElement("a");
       link.href = `/hc/en-au/search?content_tags=${tag.id}`;
       link.textContent = tag.name;
       link.className = "popular-tag-link";
       frag.appendChild(link);
-      frag.appendChild(document.createTextNode(" "));
+
+      // Add comma and space between tags, but not after the last tag
+      if (index < tags.length - 1) {
+        frag.appendChild(document.createTextNode(", "));
+      }
     });
     container.appendChild(frag);
   }
