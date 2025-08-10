@@ -1,266 +1,117 @@
 (function () {
-  'use strict';
-  
+  "use strict";
+
   // Key map
   const ENTER = 13;
   const ESCAPE = 27;
-  
+
+  // Small DOM helpers
+  const qs = (sel, root = document) => root.querySelector(sel);
+  const qsa = (sel, root = document) =>
+    Array.prototype.slice.call(root.querySelectorAll(sel));
+
   function toggleNavigation(toggle, menu) {
     const isExpanded = menu.getAttribute("aria-expanded") === "true";
     menu.setAttribute("aria-expanded", !isExpanded);
     toggle.setAttribute("aria-expanded", !isExpanded);
   }
-  
+
   function closeNavigation(toggle, menu) {
     menu.setAttribute("aria-expanded", false);
     toggle.setAttribute("aria-expanded", false);
     toggle.focus();
   }
-    
+
   function readingTime() {
-    const textEl = document.getElementById("article-body");
-    const timeEl = document.getElementById("time");
-    if (!textEl || !timeEl) return;
-    const text = textEl.innerText || "";
+    const bodyEl = qs("#article-body");
+    const timeEl = qs("#time");
+    if (!bodyEl || !timeEl) return;
+    const text = bodyEl.textContent || "";
     const wpm = 225;
     const words = text.trim().split(/\s+/).length;
     const time = Math.ceil(words / wpm);
-    timeEl.innerText = time;
+    timeEl.textContent = time;
   }
-  
-  const articlebody = document.getElementById("article-body");
-  if (articlebody) {
-    readingTime();
-  }
-  
-  // Table of Contents
-  document.addEventListener("DOMContentLoaded", () => {
-    const tocContainer = document.querySelector('.toc-container');
-  
-    // Exit if the tocContainer doesn't exist
-    if (!tocContainer) {
-      return;
-    }
-    
-    // Select only h2-h4 heading elements
-    const headings = document.querySelectorAll(".article-content h2, h3");
-    
-    // Hide the tocContainer if no headings are found
-    if (headings.length === 0) {
-      tocContainer.parentElement.style.display = 'none';
-      return;
-    }
-    
-    const tocList = document.createElement('ul');
-    let currentLevel = 2; // Start at h2 level
-    let currentList = tocList;
-    
-    tocContainer.setAttribute('role', 'navigation');
-    tocContainer.setAttribute('aria-label', 'Table of Contents');
-    
-    headings.forEach((heading, index) => {
-      if (!heading.id) {
-        heading.id = heading.textContent.trim()
-          .toLowerCase()
-          .replace(/\W+/g, '-') + '-' + index;
-      }
-        
-      const level = parseInt(heading.tagName[1]);
-      const listItem = document.createElement('li');
-      const link = document.createElement('a');
-      
-      // Set up the link with expand/collapse functionality
-      link.href = `#${heading.id}`;
-      link.textContent = heading.textContent;
-      link.classList.add('toc-link');
-      
-      // Add expand/collapse indicator if item has children
-      const nextHeading = headings[index + 1];
-      if (nextHeading && parseInt(nextHeading.tagName[1]) > level) {
-        link.classList.add('has-children');
-      }
-      
-      listItem.appendChild(link);
-      
-      if (level > currentLevel) {
-        const nestedList = document.createElement('ul');
-        nestedList.classList.add('nested');
-        currentList.lastElementChild.appendChild(nestedList);
-        currentList = nestedList;
-      } else if (level < currentLevel) {
-        while (currentLevel > level) {
-          currentList = currentList.parentElement.parentElement;
-          currentLevel--;
-        }
-      }
-        
-      currentList.appendChild(listItem);
-      currentLevel = level;
-    });
-        
-    tocContainer.appendChild(tocList);
-    
-    // Add click handlers for expand/collapse
-    tocContainer.addEventListener('click', (e) => {
-      if (e.target.classList.contains('has-children')) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.target.classList.toggle('expanded');
-        const nestedList = e.target.parentElement.querySelector('.nested');
-        if (nestedList) {
-          nestedList.classList.toggle('show');
-        }
-      }
-    });
-  });
-    
-  // Navigation
-  
-  window.addEventListener("DOMContentLoaded", () => {
-    const menuButton = document.querySelector(".header .menu-button-mobile");
-    const menuList = document.querySelector("#user-nav-mobile");
-  
-    if (menuButton && menuList) {
-      menuButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-        toggleNavigation(menuButton, menuList);
-      });
-  
-      menuList.addEventListener("keyup", (event) => {
-        if (event.keyCode === ESCAPE) {
-          event.stopPropagation();
-          closeNavigation(menuButton, menuList);
-        }
-      });
-    }
-  
-    // Toggles expanded aria to collapsible elements
-    const collapsible = document.querySelectorAll(
-      ".collapsible-nav, .collapsible-sidebar"
-    );
-  
-    collapsible.forEach((element) => {
-      const toggle = element.querySelector(
-        ".collapsible-nav-toggle, .collapsible-sidebar-toggle"
-      );
-      
-      element.addEventListener("click", () => {
-        toggleNavigation(toggle, element);
-      });
-      
-      element.addEventListener("keyup", (event) => {
-        console.log("escape");
-        if (event.keyCode === ESCAPE) {
-          closeNavigation(toggle, element);
-        }
-      });
-    });
-      
-    // If multibrand search has more than 5 help centers or categories collapse the list
-    const multibrandFilterLists = document.querySelectorAll(
-      ".multibrand-filter-list"
-    );
-    multibrandFilterLists.forEach((filter) => {
-      if (filter.children.length > 6) {
-        // Display the show more button
-        const trigger = filter.querySelector(".see-all-filters");
-        if (!trigger) return;
-        trigger.setAttribute("aria-hidden", false);
-        // Add event handler for click
-        trigger.addEventListener("click", (event) => {
-          event.stopPropagation();
-          trigger.parentNode.removeChild(trigger);
-          filter.classList.remove("multibrand-filter-list--collapsed");
-        });
-      }
-    });
-  });
-  
-  const isPrintableChar = (str) => {
-    return str.length === 1 && str.match(/^\S$/);
-  };
-  
+
+  const isPrintableChar = (str) => str.length === 1 && /\S/.test(str);
+
   function Dropdown(toggle, menu) {
     this.toggle = toggle;
     this.menu = menu;
-  
+
     this.menuPlacement = {
       top: menu.classList.contains("dropdown-menu-top"),
       end: menu.classList.contains("dropdown-menu-end"),
     };
-  
+
     this.toggle.addEventListener("click", this.clickHandler.bind(this));
     this.toggle.addEventListener("keydown", this.toggleKeyHandler.bind(this));
     this.menu.addEventListener("keydown", this.menuKeyHandler.bind(this));
-    document.body.addEventListener("click", this.outsideClickHandler.bind(this));
-     
+    document.body.addEventListener(
+      "click",
+      this.outsideClickHandler.bind(this)
+    );
+
     const toggleId = this.toggle.getAttribute("id") || crypto.randomUUID();
     const menuId = this.menu.getAttribute("id") || crypto.randomUUID();
-  
+
     this.toggle.setAttribute("id", toggleId);
     this.menu.setAttribute("id", menuId);
-  
+
     this.toggle.setAttribute("aria-controls", menuId);
     this.menu.setAttribute("aria-labelledby", toggleId);
-  
+
     this.menu.setAttribute("tabindex", -1);
     this.menuItems.forEach((menuItem) => {
       menuItem.tabIndex = -1;
     });
-     
+
     this.focusedIndex = -1;
   }
-  
+
   Dropdown.prototype = {
     get isExpanded() {
       return this.toggle.getAttribute("aria-expanded") === "true";
     },
-  
+
     get menuItems() {
-      return Array.prototype.slice.call(
-        this.menu.querySelectorAll("[role='menuitem'], [role='menuitemradio']")
-      );
+      return qsa("[role='menuitem'], [role='menuitemradio']", this.menu);
     },
-  
+
     dismiss: function () {
       if (!this.isExpanded) return;
-  
       this.toggle.removeAttribute("aria-expanded");
       this.menu.classList.remove("dropdown-menu-end", "dropdown-menu-top");
       this.focusedIndex = -1;
     },
-  
+
     open: function () {
       if (this.isExpanded) return;
-  
       this.toggle.setAttribute("aria-expanded", true);
       this.handleOverflow();
     },
-  
+
     handleOverflow: function () {
-      var rect = this.menu.getBoundingClientRect();
-    
-      var overflow = {
+      const rect = this.menu.getBoundingClientRect();
+      const overflow = {
         right: rect.left < 0 || rect.left + rect.width > window.innerWidth,
         bottom: rect.top < 0 || rect.top + rect.height > window.innerHeight,
       };
-    
+
       if (overflow.right || this.menuPlacement.end) {
         this.menu.classList.add("dropdown-menu-end");
       }
-    
       if (overflow.bottom || this.menuPlacement.top) {
         this.menu.classList.add("dropdown-menu-top");
       }
-    
       if (this.menu.getBoundingClientRect().top < 0) {
         this.menu.classList.remove("dropdown-menu-top");
       }
     },
-  
+
     focusByIndex: function (index) {
       if (!this.menuItems.length) return;
-    
+
       this.menuItems.forEach((item, itemIndex) => {
         if (itemIndex === index) {
           item.tabIndex = 0;
@@ -269,60 +120,47 @@
           item.tabIndex = -1;
         }
       });
-    
+
       this.focusedIndex = index;
     },
-              
+
     focusFirstMenuItem: function () {
       this.focusByIndex(0);
     },
-    
+
     focusLastMenuItem: function () {
       this.focusByIndex(this.menuItems.length - 1);
     },
-    
+
     focusNextMenuItem: function (currentItem) {
       if (!this.menuItems.length) return;
-    
       const currentIndex = this.menuItems.indexOf(currentItem);
       const nextIndex = (currentIndex + 1) % this.menuItems.length;
-    
       this.focusByIndex(nextIndex);
     },
-  
+
     focusPreviousMenuItem: function (currentItem) {
       if (!this.menuItems.length) return;
-    
       const currentIndex = this.menuItems.indexOf(currentItem);
       const previousIndex =
         currentIndex <= 0 ? this.menuItems.length - 1 : currentIndex - 1;
-    
       this.focusByIndex(previousIndex);
     },
-              
+
     focusByChar: function (currentItem, char) {
       char = char.toLowerCase();
-    
       const itemChars = this.menuItems.map((menuItem) =>
-        menuItem.textContent.trim()[0].toLowerCase()
+        (menuItem.textContent || "").trim()[0]?.toLowerCase()
       );
-    
+
       const startIndex =
         (this.menuItems.indexOf(currentItem) + 1) % this.menuItems.length;
-    
-      // look up starting from current index
+
       let index = itemChars.indexOf(char, startIndex);
-    
-      // if not found, start from start
-      if (index === -1) {
-        index = itemChars.indexOf(char, 0);
-      }
-    
-      if (index > -1) {
-        this.focusByIndex(index);
-      }
+      if (index === -1) index = itemChars.indexOf(char, 0);
+      if (index > -1) this.focusByIndex(index);
     },
-  
+
     outsideClickHandler: function (e) {
       if (
         this.isExpanded &&
@@ -333,11 +171,10 @@
         this.toggle.focus();
       }
     },
-              
+
     clickHandler: function (event) {
       event.stopPropagation();
       event.preventDefault();
-    
       if (this.isExpanded) {
         this.dismiss();
         this.toggle.focus();
@@ -346,84 +183,75 @@
         this.focusFirstMenuItem();
       }
     },
-              
+
     toggleKeyHandler: function (e) {
       const key = e.key;
       switch (key) {
         case "Enter":
         case " ":
         case "ArrowDown":
-        case "Down": {
+        case "Down":
           e.stopPropagation();
           e.preventDefault();
           this.open();
           this.focusFirstMenuItem();
           break;
-        }
         case "ArrowUp":
-        case "Up": {
+        case "Up":
           e.stopPropagation();
           e.preventDefault();
           this.open();
           this.focusLastMenuItem();
           break;
-        }
         case "Esc":
-        case "Escape": {
+        case "Escape":
           e.stopPropagation();
           e.preventDefault();
           this.dismiss();
           this.toggle.focus();
           break;
-        }
       }
     },
-  
+
     menuKeyHandler: function (e) {
       const key = e.key;
       const currentElement = this.menuItems[this.focusedIndex];
-    
-      if (e.ctrlKey || e.altKey || e.metaKey) {
-        return;
-      }
+
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
       switch (key) {
         case "Esc":
-        case "Escape": {
+        case "Escape":
           e.stopPropagation();
           e.preventDefault();
           this.dismiss();
           this.toggle.focus();
           break;
-        }
         case "ArrowDown":
-        case "Down": {
+        case "Down":
           e.stopPropagation();
           e.preventDefault();
           this.focusNextMenuItem(currentElement);
           break;
-        }
         case "ArrowUp":
-        case "Up": {
+        case "Up":
           e.stopPropagation();
           e.preventDefault();
           this.focusPreviousMenuItem(currentElement);
           break;
-        }
         case "Home":
-        case "PageUp": {
+        case "PageUp":
           e.stopPropagation();
           e.preventDefault();
           this.focusFirstMenuItem();
           break;
-        }
         case "End":
-        case "PageDown": {
+        case "PageDown":
           e.stopPropagation();
           e.preventDefault();
           this.focusLastMenuItem();
           break;
-        }
-        case "Tab": {
+        case "Tab":
           if (e.shiftKey) {
             e.stopPropagation();
             e.preventDefault();
@@ -433,20 +261,17 @@
             this.dismiss();
           }
           break;
-        }
-        default: {
+        default:
           if (isPrintableChar(key)) {
             e.stopPropagation();
             e.preventDefault();
             this.focusByChar(currentElement, key);
           }
-        }
       }
     },
   };
-  
-  // Vanilla JS debounce function, by Josh W. Comeau:
-  // https://www.joshwcomeau.com/snippets/javascript/debounce/
+
+  // Debounce
   function debounce(callback, wait) {
     let timeoutId = null;
     return (...args) => {
@@ -456,16 +281,223 @@
       }, wait);
     };
   }
-  
-  // Define variables for search field
+
+  // CSRF helpers (deduped)
+  async function fetchCSRFToken() {
+    try {
+      const response = await fetch("/api/v2/users/me.json");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch CSRF token: ${response.status}`);
+      }
+      const data = await response.json();
+      return data.user.authenticity_token;
+    } catch (error) {
+      console.error("Error fetching CSRF token:", error);
+      return null;
+    }
+  }
+
+  function cacheCSRFToken(token) {
+    localStorage.setItem("zd_csrf_token", token);
+    localStorage.setItem("zd_csrf_token_timestamp", Date.now());
+  }
+
+  function getCachedCSRFToken() {
+    const token = localStorage.getItem("zd_csrf_token");
+    const timestamp = localStorage.getItem("zd_csrf_token_timestamp");
+    if (token && timestamp && Date.now() - timestamp < 120000) return token;
+    return null;
+  }
+
+  async function getCSRFTokenWithCache() {
+    const cached = getCachedCSRFToken();
+    if (cached) return cached;
+    const token = await fetchCSRFToken();
+    if (token) cacheCSRFToken(token);
+    return token;
+  }
+
+  // Data fetchers (unchanged behavior)
+  async function fetchRecentlyUpdatedArticles(limit = 5) {
+    try {
+      const csrfToken = await getCSRFTokenWithCache();
+      if (!csrfToken) {
+        throw new Error(
+          "Could not retrieve CSRF token. User may not be logged in."
+        );
+      }
+      const apiUrl = `/api/v2/help_center/articles.json?sort_by=created_at&sort_order=desc&per_page=${limit}`;
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+      });
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
+      return data.articles;
+    } catch (error) {
+      console.error("Error fetching recent articles:", error);
+      return [];
+    }
+  }
+
+  async function fetchAllContentTags() {
+    try {
+      const csrfToken = await getCSRFTokenWithCache();
+      if (!csrfToken) {
+        throw new Error(
+          "Could not retrieve CSRF token. User may not be logged in."
+        );
+      }
+      const apiUrl = `/api/v2/guide/content_tags?page[size]=30`;
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+      });
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
+      return data.records;
+    } catch (error) {
+      console.error("Error fetching content tags:", error);
+      return [];
+    }
+  }
+
+  async function fetchArticlesForTagCount(perPage = 100) {
+    try {
+      const csrfToken = await getCSRFTokenWithCache();
+      if (!csrfToken) {
+        throw new Error(
+          "Could not retrieve CSRF token. User may not be logged in."
+        );
+      }
+      const apiUrl = `/api/v2/help_center/articles.json?per_page=${perPage}`;
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+      });
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
+      return data.articles;
+    } catch (error) {
+      console.error("Error fetching articles for tag count:", error);
+      return [];
+    }
+  }
+
+  async function fetchTopContentTags(limit = 3) {
+    try {
+      const allTags = await fetchAllContentTags();
+      if (!allTags || allTags.length === 0) return [];
+
+      const tagMap = {};
+      allTags.forEach((tag) => {
+        tagMap[tag.id] = tag;
+      });
+
+      const articles = await fetchArticlesForTagCount(100);
+      if (!articles || articles.length === 0) return [];
+
+      const tagCounts = {};
+      articles.forEach((article) => {
+        if (article.content_tag_ids && article.content_tag_ids.length > 0) {
+          article.content_tag_ids.forEach((tagId) => {
+            tagCounts[tagId] = (tagCounts[tagId] || 0) + 1;
+          });
+        }
+      });
+
+      const tagArray = Object.keys(tagCounts).map((tagId) => ({
+        id: tagId,
+        name: tagMap[tagId] ? tagMap[tagId].name : "Unknown Tag",
+        count: tagCounts[tagId],
+      }));
+
+      tagArray.sort((a, b) => b.count - a.count);
+      return tagArray.slice(0, limit);
+    } catch (error) {
+      console.error("Error fetching top content tags:", error);
+      return [];
+    }
+  }
+
+  // Renderers (more efficient DOM updates)
+  function displayRecentArticles(containerId, articles) {
+    const container = qs(`#${containerId}`);
+    if (!container) {
+      console.error(`Container with ID "${containerId}" not found.`);
+      return;
+    }
+    container.innerHTML = "";
+    if (!articles || !articles.length) return;
+
+    const frag = document.createDocumentFragment();
+    articles.forEach((article) => {
+      let snippet = "";
+      if (article.body) {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = article.body;
+        const textContent = tempDiv.textContent || tempDiv.innerText || "";
+        snippet =
+          textContent.substring(0, 117) +
+          (textContent.length > 117 ? "..." : "");
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+        <article class="article-item">
+          <div class="article-inner">
+            <h3 class="article-title"><a href="${article.html_url}">${article.title}</a></h3>
+            <p class="article-description">${snippet}</p>
+          </div>
+        </article>
+      `.trim();
+      frag.appendChild(wrapper.firstElementChild);
+    });
+    container.appendChild(frag);
+  }
+
+  function displayTopTagLinks(containerId, tags) {
+    const container = qs(`#${containerId}`);
+    if (!container) {
+      console.error(`Container with ID "${containerId}" not found.`);
+      return;
+    }
+    container.innerHTML = "";
+    if (!tags || !tags.length) return;
+
+    const frag = document.createDocumentFragment();
+    tags.forEach((tag) => {
+      const link = document.createElement("a");
+      link.href = `/hc/en-au/search?content_tags=${tag.id}`;
+      link.textContent = tag.name;
+      link.className = "popular-tag-link";
+      frag.appendChild(link);
+      frag.appendChild(document.createTextNode(" "));
+    });
+    container.appendChild(frag);
+  }
+
+  // Search helpers
   let searchFormFilledClassName = "search-has-value";
   let searchFormSelector = "form[role='search']";
-  
-  // Clear the search input, and then return focus to it
+
   function clearSearchInput(event) {
-    event.target
-      .closest(searchFormSelector)
-      .classList.remove(searchFormFilledClassName);
+    const form = event.target.closest(searchFormSelector);
+    if (!form) return;
+    form.classList.remove(searchFormFilledClassName);
+
     let input;
     if (event.target.tagName === "INPUT") {
       input = event.target;
@@ -474,25 +506,19 @@
     } else {
       input = event.target.closest("button").previousElementSibling;
     }
-    input.value = "";
-    input.focus();
+    if (input) {
+      input.value = "";
+      input.focus();
+    }
   }
-  
-  // Have the search input and clear button respond
-  // when someone presses the escape key, per:
-  // https://twitter.com/adambsilver/status/1152452833234554880
+
   function clearSearchInputOnKeypress(event) {
     const searchInputDeleteKeys = ["Delete", "Escape"];
     if (searchInputDeleteKeys.includes(event.key)) {
       clearSearchInput(event);
     }
   }
-  
-  // Create an HTML button that all users -- especially keyboard users --
-  // can interact with, to clear the search input.
-  // To learn more about this, see:
-  // https://adrianroselli.com/2019/07/ignore-typesearch.html#Delete
-  // https://www.scottohara.me/blog/2022/02/19/custom-clear-buttons.html
+
   function buildClearSearchButton(inputId) {
     const button = document.createElement("button");
     button.setAttribute("type", "button");
@@ -505,8 +531,7 @@
     button.addEventListener("keyup", clearSearchInputOnKeypress);
     return button;
   }
-  
-  // Append the clear button to the search form
+
   function appendClearSearchButton(input, form) {
     const searchClearButton = buildClearSearchButton(input.id);
     form.append(searchClearButton);
@@ -514,538 +539,384 @@
       form.classList.add(searchFormFilledClassName);
     }
   }
-  
-  // Add a class to the search form when the input has a value;
-  // Remove that class from the search form when the input doesn't have a value.
-  // Do this on a delay, rather than on every keystroke.
+
   const toggleClearSearchButtonAvailability = debounce((event) => {
     const form = event.target.closest(searchFormSelector);
+    if (!form) return;
     form.classList.toggle(
       searchFormFilledClassName,
       event.target.value.length > 0
     );
   }, 200);
-  
-  // Search
-  
-  window.addEventListener("DOMContentLoaded", () => {
-    // Set up clear functionality for the search field
-    const searchForms = [...document.querySelectorAll(searchFormSelector)];
-    const searchInputs = searchForms.map((form) =>
-      form.querySelector("input[type='search']")
-    );
-    searchInputs.forEach((input) => {
-      appendClearSearchButton(input, input.closest(searchFormSelector));
-      input.addEventListener("keyup", clearSearchInputOnKeypress);
-      input.addEventListener("keyup", toggleClearSearchButtonAvailability);
-    });
-  });
-  
-  const key = "returnFocusTo";
-  
-  function saveFocus() {
-    const activeElementId = document.activeElement.getAttribute("id");
-    sessionStorage.setItem(key, "#" + activeElementId);
-  }
-  
-  function returnFocus() {
-    const returnFocusTo = sessionStorage.getItem(key);
-    if (returnFocusTo) {
-      sessionStorage.removeItem("returnFocusTo");
-      const returnFocusToEl = document.querySelector(returnFocusTo);
-      returnFocusToEl && returnFocusToEl.focus && returnFocusToEl.focus();
-    }
-  }
-  
-  // Forms
-  
-  window.addEventListener("DOMContentLoaded", () => {
-    // In some cases we should preserve focus after page reload
-    returnFocus();
-  
-    // show form controls when the textarea receives focus or back button is used and value exists
-    const commentContainerTextarea = document.querySelector(
-      ".comment-container textarea"
-    );
-    const commentContainerFormControls = document.querySelector(
-      ".comment-form-controls, .comment-ccs"
-    );
-  
-    if (commentContainerTextarea) {
-      commentContainerTextarea.addEventListener(
-        "focus",
-        function focusCommentContainerTextarea() {
-          commentContainerFormControls.style.display = "block";
-          commentContainerTextarea.removeEventListener(
-            "focus",
-            focusCommentContainerTextarea
-          );
-        }
-      );
-  
-      if (commentContainerTextarea.value !== "") {
-        commentContainerFormControls.style.display = "block";
+
+  // One DOMContentLoaded to rule them all
+  document.addEventListener("DOMContentLoaded", () => {
+    // Reading time
+    readingTime();
+
+    // Table of Contents
+    (function buildTOC() {
+      const tocContainer = qs(".toc-container");
+      if (!tocContainer) return;
+
+      const headings = qsa(".article-content h2, h3");
+      if (!headings.length) {
+        if (tocContainer.parentElement)
+          tocContainer.parentElement.style.display = "none";
+        return;
       }
-    }
-    
-    // Expand Request comment form when Add to conversation is clicked
-    const showRequestCommentContainerTrigger = document.querySelector(
-      ".request-container .comment-container .comment-show-container"
-    );
-    const requestCommentFields = document.querySelectorAll(
-      ".request-container .comment-container .comment-fields"
-    );
-    const requestCommentSubmit = document.querySelector(
-      ".request-container .comment-container .request-submit-comment"
-    );
-    
-    if (showRequestCommentContainerTrigger) {
-      showRequestCommentContainerTrigger.addEventListener("click", () => {
-        showRequestCommentContainerTrigger.style.display = "none";
-        Array.prototype.forEach.call(requestCommentFields, (element) => {
-          element.style.display = "block";
-        });
-        requestCommentSubmit.style.display = "inline-block";
-    
-        if (commentContainerTextarea) {
-          commentContainerTextarea.focus();
+
+      const tocList = document.createElement("ul");
+      let currentLevel = 2;
+      let currentList = tocList;
+
+      tocContainer.setAttribute("role", "navigation");
+      tocContainer.setAttribute("aria-label", "Table of Contents");
+
+      headings.forEach((heading, index) => {
+        if (!heading.id) {
+          heading.id =
+            (heading.textContent || "")
+              .trim()
+              .toLowerCase()
+              .replace(/\W+/g, "-") +
+            "-" +
+            index;
         }
-      });
-    }
-    
-    // Mark as solved button
-    const requestMarkAsSolvedButton = document.querySelector(
-      ".request-container .mark-as-solved:not([data-disabled])"
-    );
-    const requestMarkAsSolvedCheckbox = document.querySelector(
-      ".request-container .comment-container input[type=checkbox]"
-    );
-    const requestCommentSubmitButton = document.querySelector(
-      ".request-container .comment-container input[type=submit]"
-    );
-    
-    if (requestMarkAsSolvedButton) {
-      requestMarkAsSolvedButton.addEventListener("click", () => {
-        requestMarkAsSolvedCheckbox.setAttribute("checked", true);
-        requestCommentSubmitButton.disabled = true;
-        requestMarkAsSolvedButton.setAttribute("data-disabled", true);
-        requestMarkAsSolvedButton.form.submit();
-      });
-    }
-    
-    // Change Mark as solved text according to whether comment is filled
-    const requestCommentTextarea = document.querySelector(
-      ".request-container .comment-container textarea"
-    );
-    
-    const usesWysiwyg =
-      requestCommentTextarea &&
-      requestCommentTextarea.dataset.helper === "wysiwyg";
-  
-    function isEmptyPlaintext(s) {
-      return s.trim() === "";
-    }
-    
-    function isEmptyHtml(xml) {
-      const doc = new DOMParser().parseFromString(`<_>${xml}</_>`, "text/xml");
-      const img = doc.querySelector("img");
-      return img === null && isEmptyPlaintext(doc.children[0].textContent);
-    }
-    
-    const isEmpty = usesWysiwyg ? isEmptyHtml : isEmptyPlaintext;
-    
-    if (requestCommentTextarea) {
-      requestCommentTextarea.addEventListener("input", () => {
-        if (isEmpty(requestCommentTextarea.value)) {
-          if (requestMarkAsSolvedButton) {
-            requestMarkAsSolvedButton.innerText =
-              requestMarkAsSolvedButton.getAttribute("data-solve-translation");
+
+        const level = parseInt(heading.tagName[1], 10);
+        const listItem = document.createElement("li");
+        const link = document.createElement("a");
+
+        link.href = `#${heading.id}`;
+        link.textContent = heading.textContent || "";
+        link.classList.add("toc-link");
+
+        const nextHeading = headings[index + 1];
+        if (nextHeading && parseInt(nextHeading.tagName[1], 10) > level) {
+          link.classList.add("has-children");
+        }
+
+        listItem.appendChild(link);
+
+        if (level > currentLevel) {
+          const nestedList = document.createElement("ul");
+          nestedList.classList.add("nested");
+          if (currentList.lastElementChild) {
+            currentList.lastElementChild.appendChild(nestedList);
+            currentList = nestedList;
           }
-        } else {
-          if (requestMarkAsSolvedButton) {
-            requestMarkAsSolvedButton.innerText =
-              requestMarkAsSolvedButton.getAttribute(
-                "data-solve-and-submit-translation"
-              );
+        } else if (level < currentLevel) {
+          while (currentLevel > level) {
+            currentList = currentList.parentElement.parentElement;
+            currentLevel--;
           }
         }
+
+        currentList.appendChild(listItem);
+        currentLevel = level;
       });
-    }
-  
-    const selects = document.querySelectorAll(
-      "#request-status-select, #request-organization-select"
-    );
-    
-    selects.forEach((element) => {
-      element.addEventListener("change", (event) => {
-        event.stopPropagation();
-        saveFocus();
-        element.form.submit();
+
+      tocContainer.appendChild(tocList);
+
+      tocContainer.addEventListener("click", (e) => {
+        const t = e.target;
+        if (t && t.classList && t.classList.contains("has-children")) {
+          e.preventDefault();
+          e.stopPropagation();
+          t.classList.toggle("expanded");
+          const nestedList = t.parentElement.querySelector(".nested");
+          if (nestedList) nestedList.classList.toggle("show");
+        }
       });
-    });
-      
-    // Submit requests filter form on search in the request list page
-    const quickSearch = document.querySelector("#quick-search");
-    if (quickSearch) {
-      quickSearch.addEventListener("keyup", (event) => {
-        if (event.keyCode === ENTER) {
+    })();
+
+    // Navigation
+    (function nav() {
+      const menuButton = qs(".header .menu-button-mobile");
+      const menuList = qs("#user-nav-mobile");
+      if (menuButton && menuList) {
+        menuButton.addEventListener("click", (event) => {
           event.stopPropagation();
-          saveFocus();
-          quickSearch.form.submit();
-        }
-      });
-    }
-  
-    // Submit organization form in the request page
-    const requestOrganisationSelect = document.querySelector(
-      "#request-organization select"
-    );
-    
-    if (requestOrganisationSelect) {
-      requestOrganisationSelect.addEventListener("change", () => {
-        requestOrganisationSelect.form.submit();
-      });
-  
-      requestOrganisationSelect.addEventListener("click", (e) => {
-        // Prevents Ticket details collapsible-sidebar to close on mobile
-        e.stopPropagation();
-      });
-    }
-    
-    // If there are any error notifications below an input field, focus that field
-    const notificationElm = document.querySelector(".notification-error");
-    if (
-      notificationElm &&
-      notificationElm.previousElementSibling &&
-      typeof notificationElm.previousElementSibling.focus === "function"
-    ) {
-      notificationElm.previousElementSibling.focus();
-    }
-  });
-  
-  // Function to fetch the current user's CSRF token
-  async function fetchCSRFToken() {
-    try {
-      const response = await fetch("/api/v2/users/me.json");
-      if (!response.ok) {
-        throw new Error(`Failed to fetch CSRF token: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.user.authenticity_token;
-    } catch (error) {
-      console.error("Error fetching CSRF token:", error);
-      return null;
-    }
-  }
-      
-  // Function to fetch the current user's CSRF token
-  async function fetchCSRFTokenDuplicate() {
-    // (left intentionally in case something else references it later)
-    return fetchCSRFToken();
-  }
-  
-  // Function to fetch recently updated articles with CSRF token
-  async function fetchRecentlyUpdatedArticles(limit = 5) {
-    try {
-      // First get the CSRF token
-      const csrfToken = await fetchCSRFToken();
-      
-      if (!csrfToken) {
-        throw new Error("Could not retrieve CSRF token. User may not be logged in.");
-      }
-      
-      // Construct the Zendesk API URL for articles sorted by updated_at
-      const apiUrl = `/api/v2/help_center/articles.json?sort_by=created_at&sort_order=desc&per_page=${limit}`;
-      
-      // Make the API request with the CSRF token
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
-        }
-      });
-  
-      // Check if the request was successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-  
-      // Parse the JSON response
-      const data = await response.json();
-      
-      // Return the articles array
-      return data.articles;
-    } catch (error) {
-      console.error('Error fetching recent articles:', error);
-      return [];
-    }
-  }
-  
-  // ---------- FIX: fetch content tags localized, handle both shapes + pagination ----------
-  function currentLocale() {
-    try {
-      if (window.HelpCenter) {
-        return (HelpCenter.user && HelpCenter.user.locale) ||
-               HelpCenter.locale ||
-               (HelpCenter.account && HelpCenter.account.default_locale) ||
-               (document.documentElement.lang || 'en-us');
-      }
-    } catch (_) {}
-    return document.documentElement.lang || 'en-us';
-  }
+          toggleNavigation(menuButton, menuList);
+        });
 
-  async function fetchAllContentTags() {
-    try {
-      // CSRF is optional for GETs; include if available, but don't require it
-      const csrfToken = await getCSRFTokenWithCache().catch(() => null);
-  
-      const locale =
-        (function currentLocale() {
-          try {
-            if (window.HelpCenter) {
-              return (
-                (HelpCenter.user && HelpCenter.user.locale) ||
-                HelpCenter.locale ||
-                (HelpCenter.account && HelpCenter.account.default_locale) ||
-                document.documentElement.lang ||
-                'en-us'
-              );
+        menuList.addEventListener("keyup", (event) => {
+          if (event.keyCode === ESCAPE) {
+            event.stopPropagation();
+            closeNavigation(menuButton, menuList);
+          }
+        });
+      }
+
+      const collapsible = qsa(".collapsible-nav, .collapsible-sidebar");
+      collapsible.forEach((element) => {
+        const toggle = qs(
+          ".collapsible-nav-toggle, .collapsible-sidebar-toggle",
+          element
+        );
+        element.addEventListener("click", () =>
+          toggleNavigation(toggle, element)
+        );
+        element.addEventListener("keyup", (event) => {
+          // keep console.log("escape") behavior
+          console.log("escape");
+          if (event.keyCode === ESCAPE) closeNavigation(toggle, element);
+        });
+      });
+
+      const multibrandFilterLists = qsa(".multibrand-filter-list");
+      multibrandFilterLists.forEach((filter) => {
+        if (filter.children.length > 6) {
+          const trigger = qs(".see-all-filters", filter);
+          if (!trigger) return;
+          trigger.setAttribute("aria-hidden", false);
+          trigger.addEventListener("click", (event) => {
+            event.stopPropagation();
+            trigger.parentNode.removeChild(trigger);
+            filter.classList.remove("multibrand-filter-list--collapsed");
+          });
+        }
+      });
+    })();
+
+    // Dropdowns
+    (function dropdownsInit() {
+      const dropdownToggles = qsa(".dropdown-toggle");
+      dropdownToggles.forEach((toggle) => {
+        const menu = toggle.nextElementSibling;
+        if (menu && menu.classList.contains("dropdown-menu")) {
+          new Dropdown(toggle, menu);
+        }
+      });
+    })();
+
+    // Share
+    (function shareInit() {
+      const links = qsa(".share a");
+      links.forEach((anchor) => {
+        anchor.addEventListener("click", (event) => {
+          event.preventDefault();
+          window.open(anchor.href, "", "height = 500, width = 500");
+        });
+      });
+    })();
+
+    // Search field clear button
+    (function searchInit() {
+      const searchForms = qsa(searchFormSelector);
+      const searchInputs = searchForms
+        .map((form) => qs("input[type='search']", form))
+        .filter(Boolean);
+      searchInputs.forEach((input) => {
+        appendClearSearchButton(input, input.closest(searchFormSelector));
+        input.addEventListener("keyup", clearSearchInputOnKeypress);
+        input.addEventListener("keyup", toggleClearSearchButtonAvailability);
+      });
+    })();
+
+    // Forms
+    (function formsInit() {
+      // Preserve focus
+      (function returnFocus() {
+        const key = "returnFocusTo";
+        const returnFocusTo = sessionStorage.getItem(key);
+        if (returnFocusTo) {
+          sessionStorage.removeItem("returnFocusTo");
+          const el = qs(returnFocusTo);
+          el && el.focus && el.focus();
+        }
+      })();
+
+      const commentContainerTextarea = qs(".comment-container textarea");
+      const commentContainerFormControls = qs(
+        ".comment-form-controls, .comment-ccs"
+      );
+
+      if (commentContainerTextarea) {
+        commentContainerTextarea.addEventListener(
+          "focus",
+          function focusCommentContainerTextarea() {
+            if (commentContainerFormControls)
+              commentContainerFormControls.style.display = "block";
+            commentContainerTextarea.removeEventListener(
+              "focus",
+              focusCommentContainerTextarea
+            );
+          }
+        );
+
+        if (
+          commentContainerTextarea.value !== "" &&
+          commentContainerFormControls
+        ) {
+          commentContainerFormControls.style.display = "block";
+        }
+      }
+
+      const showRequestCommentContainerTrigger = qs(
+        ".request-container .comment-container .comment-show-container"
+      );
+      const requestCommentFields = qsa(
+        ".request-container .comment-container .comment-fields"
+      );
+      const requestCommentSubmit = qs(
+        ".request-container .comment-container .request-submit-comment"
+      );
+
+      if (showRequestCommentContainerTrigger) {
+        showRequestCommentContainerTrigger.addEventListener("click", () => {
+          showRequestCommentContainerTrigger.style.display = "none";
+          requestCommentFields.forEach((el) => {
+            el.style.display = "block";
+          });
+          if (requestCommentSubmit)
+            requestCommentSubmit.style.display = "inline-block";
+          if (commentContainerTextarea) commentContainerTextarea.focus();
+        });
+      }
+
+      const requestMarkAsSolvedButton = qs(
+        ".request-container .mark-as-solved:not([data-disabled])"
+      );
+      const requestMarkAsSolvedCheckbox = qs(
+        ".request-container .comment-container input[type=checkbox]"
+      );
+      const requestCommentSubmitButton = qs(
+        ".request-container .comment-container input[type=submit]"
+      );
+
+      if (requestMarkAsSolvedButton) {
+        requestMarkAsSolvedButton.addEventListener("click", () => {
+          if (requestMarkAsSolvedCheckbox)
+            requestMarkAsSolvedCheckbox.setAttribute("checked", true);
+          if (requestCommentSubmitButton)
+            requestCommentSubmitButton.disabled = true;
+          requestMarkAsSolvedButton.setAttribute("data-disabled", true);
+          requestMarkAsSolvedButton.form.submit();
+        });
+      }
+
+      const requestCommentTextarea = qs(
+        ".request-container .comment-container textarea"
+      );
+      const usesWysiwyg =
+        requestCommentTextarea &&
+        requestCommentTextarea.dataset.helper === "wysiwyg";
+
+      function isEmptyPlaintext(s) {
+        return s.trim() === "";
+      }
+      function isEmptyHtml(xml) {
+        const doc = new DOMParser().parseFromString(
+          `<_>${xml}</_>`,
+          "text/xml"
+        );
+        const img = doc.querySelector("img");
+        return (
+          img === null && isEmptyPlaintext(doc.children[0].textContent || "")
+        );
+      }
+      const isEmpty = usesWysiwyg ? isEmptyHtml : isEmptyPlaintext;
+
+      if (requestCommentTextarea) {
+        requestCommentTextarea.addEventListener("input", () => {
+          if (isEmpty(requestCommentTextarea.value)) {
+            if (requestMarkAsSolvedButton) {
+              requestMarkAsSolvedButton.innerText =
+                requestMarkAsSolvedButton.getAttribute(
+                  "data-solve-translation"
+                );
             }
-          } catch (_) {}
-          return document.documentElement.lang || 'en-us';
-        })() || 'en-us';
-  
-      const results = [];
-      let url = `/api/v2/guide/content_tags?page[size]=100&locale=${encodeURIComponent(
-        locale.toLowerCase()
-      )}`;
-  
-      while (url) {
-        const headers = { 'Content-Type': 'application/json' };
-        if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
-  
-        const response = await fetch(url, { method: 'GET', headers });
-        if (!response.ok) throw new Error(`HTTP ${response.status} on ${url}`);
-  
-        const data = await response.json();
-  
-        // Some accounts return { records: [...] }, others { content_tags: [...] }
-        const pageItems = Array.isArray(data.records)
-          ? data.records
-          : Array.isArray(data.content_tags)
-          ? data.content_tags
-          : [];
-  
-        results.push(...pageItems);
-  
-        // Cursor pagination (links.next) or classic (next_page)
-        url = (data.links && data.links.next) || data.next_page || null;
+          } else {
+            if (requestMarkAsSolvedButton) {
+              requestMarkAsSolvedButton.innerText =
+                requestMarkAsSolvedButton.getAttribute(
+                  "data-solve-and-submit-translation"
+                );
+            }
+          }
+        });
       }
-  
-      // quick debug (remove later)
-      console.debug('[content-tags] fetched', results.length, 'tags');
-      return results;
-    } catch (error) {
-      console.error('Error fetching content tags:', error);
-      return [];
-    }
-  }
-  // ---------------------------------------------------------------------------------------
 
-  // Function to fetch all articles to count content tags
-  async function fetchArticlesForTagCount(perPage = 100) {
-    try {
-      // Optional CSRF for GETs
-      const csrfToken = await getCSRFTokenWithCache().catch(() => null);
-  
-      const apiUrl = `/api/v2/help_center/articles.json?per_page=${perPage}`;
-      const headers = { 'Content-Type': 'application/json' };
-      if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
-  
-      const response = await fetch(apiUrl, { method: 'GET', headers });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  
-      const data = await response.json();
-  
-      // quick debug (remove later)
-      console.debug('[articles] fetched', (data.articles || []).length, 'articles');
-      return data.articles || [];
-    } catch (error) {
-      console.error('Error fetching articles for tag count:', error);
-      return [];
-    }
-  }
-  
-  // Function to fetch top content tags by counting their occurrences in articles
-  async function fetchTopContentTags(limit = 3) {
-    try {
-      const allTags = await fetchAllContentTags();
-      if (!allTags || allTags.length === 0) {
-        console.warn('[top-tags] No content tags returned from API.');
-        return [];
-      }
-  
-      // Build a lookup for id -> tag object (use title if present, else name)
-      const tagMap = {};
-      allTags.forEach((t) => {
-        tagMap[String(t.id)] = {
-          id: String(t.id),
-          display: t.title || t.name || 'Unknown Tag',
-        };
+      const selects = qsa(
+        "#request-status-select, #request-organization-select"
+      );
+      selects.forEach((element) => {
+        element.addEventListener("change", (event) => {
+          event.stopPropagation();
+          const activeElementId =
+            document.activeElement && document.activeElement.getAttribute("id");
+          if (activeElementId)
+            sessionStorage.setItem("returnFocusTo", "#" + activeElementId);
+          element.form.submit();
+        });
       });
-  
-      const articles = await fetchArticlesForTagCount(100);
-      if (!articles || articles.length === 0) {
-        console.warn('[top-tags] No articles returned from API.');
-        return [];
-      }
-  
-      // Count tag occurrences from article.content_tag_ids
-      const tagCounts = {};
-      for (const article of articles) {
-        const ids = article.content_tag_ids || [];
-        for (const id of ids) {
-          const key = String(id);
-          tagCounts[key] = (tagCounts[key] || 0) + 1;
-        }
-      }
-  
-      // Turn into array and sort by count
-      const tagArray = Object.keys(tagCounts).map((id) => ({
-        id,
-        name: tagMap[id] ? tagMap[id].display : 'Unknown Tag',
-        count: tagCounts[id],
-      }));
-  
-      tagArray.sort((a, b) => b.count - a.count);
-  
-      // quick debug (remove later)
-      console.debug('[top-tags] computed', tagArray.length, 'tags; top:', tagArray.slice(0, limit));
-      return tagArray.slice(0, limit);
-    } catch (error) {
-      console.error('Error fetching top content tags:', error);
-      return [];
-    }
-  }
-  
-  // Function to display articles in the DOM using the specified template
-  function displayRecentArticles(containerId, articles) {
-    const container = document.getElementById(containerId);
-    
-    if (!container) {
-      console.error(`Container with ID "${containerId}" not found.`);
-      return;
-    }
-    
-    container.innerHTML = '';
-    
-    articles.forEach(article => {
-      let snippet = '';
-      if (article.body) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = article.body;
-        const textContent = tempDiv.textContent || tempDiv.innerText || '';
-        snippet = textContent.substring(0, 117) + (textContent.length > 117 ? '...' : '');
+
+      const quickSearch = qs("#quick-search");
+      if (quickSearch) {
+        quickSearch.addEventListener("keyup", (event) => {
+          if (event.keyCode === ENTER) {
+            event.stopPropagation();
+            const activeElementId =
+              document.activeElement &&
+              document.activeElement.getAttribute("id");
+            if (activeElementId)
+              sessionStorage.setItem("returnFocusTo", "#" + activeElementId);
+            quickSearch.form.submit();
+          }
+        });
       }
 
-      const articleHTML = `
-        <article class="article-item">
-          <div class="article-inner">
-            <h3 class="article-title"><a href="${article.html_url}">${article.title}</a></h3>
-            <p class="article-description">
-              ${snippet}
-            </p>
-          </div>
-        </article>
-      `;
-      
-      container.innerHTML += articleHTML;
-    });
-  }
-  
-  // Function to display top content tag links
-  function displayTopTagLinks(containerId, tags) {
-    const container = document.getElementById(containerId);
-    
-    if (!container) {
-      console.error(`Container with ID "${containerId}" not found.`);
-      return;
-    }
-  
-    container.innerHTML = '';
-    
-    tags.forEach(tag => {
-      const link = document.createElement('a');
-      link.href = `/hc/en-au/search?content_tags=${tag.id}`;
-      link.textContent = tag.name;
-      link.className = 'popular-tag-link';
-      container.appendChild(link);
-      container.appendChild(document.createTextNode(' '));
-    });
-  }
-  
-  // CSRF token caching
-  function cacheCSRFToken(token) {
-    localStorage.setItem('zd_csrf_token', token);
-    localStorage.setItem('zd_csrf_token_timestamp', Date.now());
-  }
-  
-  function getCachedCSRFToken() {
-    const token = localStorage.getItem('zd_csrf_token');
-    const timestamp = localStorage.getItem('zd_csrf_token_timestamp');
-    if (token && timestamp && (Date.now() - timestamp < 120000)) {
-      return token;
-    }
-    return null;
-  }
-  
-  async function getCSRFTokenWithCache() {
-    const cachedToken = getCachedCSRFToken();
-    if (cachedToken) {
-      return cachedToken;
-    }
-    const token = await fetchCSRFToken();
-    if (token) {
-      cacheCSRFToken(token);
-    }
-    return token;
-  }
-  
-  // Usage: Call this function when your page loads
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const articles = await fetchRecentlyUpdatedArticles(5);
-      
-      if (articles && articles.length > 0) {
-        displayRecentArticles('recent-articles', articles);
-      } else {
-        const container = document.getElementById('recent-articles');
-        if (container) {
-          container.innerHTML = '<p>No recently updated articles found.</p>';
+      const requestOrganisationSelect = qs("#request-organization select");
+      if (requestOrganisationSelect) {
+        requestOrganisationSelect.addEventListener("change", () => {
+          requestOrganisationSelect.form.submit();
+        });
+        requestOrganisationSelect.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
+      }
+
+      const notificationElm = qs(".notification-error");
+      if (
+        notificationElm &&
+        notificationElm.previousElementSibling &&
+        typeof notificationElm.previousElementSibling.focus === "function"
+      ) {
+        notificationElm.previousElementSibling.focus();
+      }
+    })();
+
+    // Content: articles + top tags
+    (async function bootContent() {
+      try {
+        const articles = await fetchRecentlyUpdatedArticles(5);
+        if (articles && articles.length > 0) {
+          displayRecentArticles("recent-articles", articles);
+        } else {
+          const container = qs("#recent-articles");
+          if (container)
+            container.innerHTML = "<p>No recently updated articles found.</p>";
+        }
+
+        const topTags = await fetchTopContentTags(3);
+        if (topTags && topTags.length > 0) {
+          displayTopTagLinks("top-tags", topTags);
+        }
+      } catch (error) {
+        console.error("Failed to load content:", error);
+        const articlesContainer = qs("#recent-articles");
+        if (articlesContainer) {
+          articlesContainer.innerHTML =
+            "<p>Unable to load recent articles. Please try again later.</p>";
+        }
+        const tagsContainer = qs("#top-tags");
+        if (tagsContainer) {
+          tagsContainer.innerHTML =
+            "<p>Unable to load popular topics. Please try again later.</p>";
         }
       }
-  
-      const topTags = await fetchTopContentTags(3);
-      if (topTags && topTags.length > 0) {
-        displayTopTagLinks('top-tags', topTags);
-      } else {
-        // Optional: leave empty, or add a subtle fallback
-        // document.getElementById('top-tags').innerText = '—';
-      }
-    } catch (error) {
-      console.error('Failed to load content:', error);
-      
-      const articlesContainer = document.getElementById('recent-articles');
-      if (articlesContainer) {
-        articlesContainer.innerHTML = '<p>Unable to load recent articles. Please try again later.</p>';
-      }
-      
-      const tagsContainer = document.getElementById('top-tags');
-      if (tagsContainer) {
-        tagsContainer.innerHTML = '<p>Unable to load popular topics. Please try again later.</p>';
-      }
-    }
+    })();
   });
 })();
