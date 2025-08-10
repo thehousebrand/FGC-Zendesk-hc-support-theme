@@ -344,6 +344,7 @@
     }
   }
 
+  // Data fetchers (unchanged behavior)
   async function fetchAllContentTags() {
     try {
       const csrfToken = await getCSRFTokenWithCache();
@@ -352,18 +353,26 @@
           "Could not retrieve CSRF token. User may not be logged in."
         );
       }
-      const apiUrl = `/api/v2/guide/content_tags?page[size]=30`;
-      const response = await fetch(apiUrl, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
-        },
-      });
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      return data.records;
+
+      const allTags = [];
+      let nextUrl = `/api/v2/guide/content_tags?page[size]=30`;
+
+      while (nextUrl) {
+        const response = await fetch(nextUrl, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrfToken,
+          },
+        });
+        if (!response.ok)
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        allTags.push(...(data.records || []));
+        nextUrl = data.meta?.has_more ? data.links?.next : null;
+      }
+
+      return allTags;
     } catch (error) {
       console.error("Error fetching content tags:", error);
       return [];
