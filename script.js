@@ -798,41 +798,54 @@
 
   async function fetchAllContentTags() {
     try {
-      const csrfToken = await getCSRFTokenWithCache();
-      if (!csrfToken) {
-        throw new Error("Could not retrieve CSRF token. User may not be logged in.");
-      }
-
-      const locale = (currentLocale() || 'en-us').toLowerCase();
+      // CSRF is optional for GETs; include if available, but don't require it
+      const csrfToken = await getCSRFTokenWithCache().catch(() => null);
+  
+      const locale =
+        (function currentLocale() {
+          try {
+            if (window.HelpCenter) {
+              return (
+                (HelpCenter.user && HelpCenter.user.locale) ||
+                HelpCenter.locale ||
+                (HelpCenter.account && HelpCenter.account.default_locale) ||
+                document.documentElement.lang ||
+                'en-us'
+              );
+            }
+          } catch (_) {}
+          return document.documentElement.lang || 'en-us';
+        })() || 'en-us';
+  
       const results = [];
-      let url = `/api/v2/guide/content_tags?page[size]=100&locale=${encodeURIComponent(locale)}`;
-
+      let url = `/api/v2/guide/content_tags?page[size]=100&locale=${encodeURIComponent(
+        locale.toLowerCase()
+      )}`;
+  
       while (url) {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': csrfToken
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
+        const headers = { 'Content-Type': 'application/json' };
+        if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+  
+        const response = await fetch(url, { method: 'GET', headers });
+        if (!response.ok) throw new Error(`HTTP ${response.status} on ${url}`);
+  
         const data = await response.json();
-
+  
         // Some accounts return { records: [...] }, others { content_tags: [...] }
-        const pageItems = Array.isArray(data.records) ? data.records
-                         : Array.isArray(data.content_tags) ? data.content_tags
-                         : [];
-
+        const pageItems = Array.isArray(data.records)
+          ? data.records
+          : Array.isArray(data.content_tags)
+          ? data.content_tags
+          : [];
+  
         results.push(...pageItems);
-
+  
         // Cursor pagination (links.next) or classic (next_page)
         url = (data.links && data.links.next) || data.next_page || null;
       }
-
+  
+      // quick debug (remove later)
+      console.debug('[content-tags] fetched', results.length, 'tags');
       return results;
     } catch (error) {
       console.error('Error fetching content tags:', error);
@@ -844,28 +857,21 @@
   // Function to fetch all articles to count content tags
   async function fetchArticlesForTagCount(perPage = 100) {
     try {
-      const csrfToken = await getCSRFTokenWithCache();
-      
-      if (!csrfToken) {
-        throw new Error("Could not retrieve CSRF token. User may not be logged in.");
-      }
-      
-      const apiUrl = `/api/v2/help_center/articles.json?per_page=${perPage}`;
-      
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
-        }
-      });
+      // Optional CSRF for GETs
+      const csrfToken = await getCSRFTokenWithCache().catch(() => null);
   
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      const apiUrl = `/api/v2/help_center/articles.json?per_page=${perPage}`;
+      const headers = { 'Content-Type': 'application/json' };
+      if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+  
+      const response = await fetch(apiUrl, { method: 'GET', headers });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
   
       const data = await response.json();
-      return data.articles;
+  
+      // quick debug (remove later)
+      console.debug('[articles] fetched', (data.articles || []).length, 'articles');
+      return data.articles || [];
     } catch (error) {
       console.error('Error fetching articles for tag count:', error);
       return [];
@@ -877,39 +883,46 @@
     try {
       const allTags = await fetchAllContentTags();
       if (!allTags || allTags.length === 0) {
+        console.warn('[top-tags] No content tags returned from API.');
         return [];
       }
-      
+  
+      // Build a lookup for id -> tag object (use title if present, else name)
       const tagMap = {};
-      allTags.forEach(tag => {
-        tagMap[tag.id] = tag;
-      });
-      
-      const articles = await fetchArticlesForTagCount(100); // Get up to 100 articles
-      if (!articles || articles.length === 0) {
-        return [];
-      }
-      
-      const tagCounts = {};
-      articles.forEach(article => {
-        if (article.content_tag_ids && article.content_tag_ids.length > 0) {
-          article.content_tag_ids.forEach(tagId => {
-            tagCounts[tagId] = (tagCounts[tagId] || 0) + 1;
-          });
-        }
-      });
-      
-      const tagArray = Object.keys(tagCounts).map(tagId => {
-        const t = tagMap[tagId];
-        return {
-          id: tagId,
-          // prefer `title` if present (localized), else `name`
-          name: (t && (t.title || t.name)) ? (t.title || t.name) : 'Unknown Tag',
-          count: tagCounts[tagId]
+      allTags.forEach((t) => {
+        tagMap[String(t.id)] = {
+          id: String(t.id),
+          display: t.title || t.name || 'Unknown Tag',
         };
       });
-      
+  
+      const articles = await fetchArticlesForTagCount(100);
+      if (!articles || articles.length === 0) {
+        console.warn('[top-tags] No articles returned from API.');
+        return [];
+      }
+  
+      // Count tag occurrences from article.content_tag_ids
+      const tagCounts = {};
+      for (const article of articles) {
+        const ids = article.content_tag_ids || [];
+        for (const id of ids) {
+          const key = String(id);
+          tagCounts[key] = (tagCounts[key] || 0) + 1;
+        }
+      }
+  
+      // Turn into array and sort by count
+      const tagArray = Object.keys(tagCounts).map((id) => ({
+        id,
+        name: tagMap[id] ? tagMap[id].display : 'Unknown Tag',
+        count: tagCounts[id],
+      }));
+  
       tagArray.sort((a, b) => b.count - a.count);
+  
+      // quick debug (remove later)
+      console.debug('[top-tags] computed', tagArray.length, 'tags; top:', tagArray.slice(0, limit));
       return tagArray.slice(0, limit);
     } catch (error) {
       console.error('Error fetching top content tags:', error);
