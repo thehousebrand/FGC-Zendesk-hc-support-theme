@@ -821,7 +821,7 @@ async function fetchRecentlyUpdatedArticles(limit = 5) {
     return [];
   }
 }
- 
+
   // Function to fetch all content tags from the content_tags endpoint
   async function fetchAllContentTags() {
     try {
