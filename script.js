@@ -9,6 +9,47 @@
   const qs = (sel, root = document) => root.querySelector(sel);
   const qsa = (sel, root = document) => Array.prototype.slice.call(root.querySelectorAll(sel));
 
+  // Locale helpers
+  function getCurrentLocale() {
+    try {
+      if (window.HelpCenter) {
+        return (
+          (HelpCenter.user && HelpCenter.user.locale) ||
+          HelpCenter.locale ||
+          (HelpCenter.account && HelpCenter.account.default_locale) ||
+          document.documentElement.lang ||
+          'en-us'
+        );
+      }
+    } catch (_) {}
+    return document.documentElement.lang || 'en-us';
+  }
+
+  function normalizeLocale(l) {
+    return (l || '').toLowerCase();
+  }
+
+  // Choose the best display name for a content tag
+  function getTagDisplayName(tag, locale) {
+    if (!tag) return 'Unknown Tag';
+    const loc = normalizeLocale(locale);
+    const base = loc.split('-')[0];
+
+    // Prefer translation titles for exact match, then base language
+    const translations = Array.isArray(tag.translations) ? tag.translations : [];
+    const byLocale = translations.find(t => normalizeLocale(t.locale) === loc);
+    const byBase = translations.find(t => normalizeLocale(t.locale).split('-')[0] === base);
+
+    const fromTx = (tx) => (tx && (tx.title || tx.name || '').trim()) || '';
+
+    return (
+      fromTx(byLocale) ||
+      fromTx(byBase) ||
+      (tag.name || '').trim() ||
+      'Unknown Tag'
+    );
+  }
+
   function toggleNavigation(toggle, menu) {
     const isExpanded = menu.getAttribute("aria-expanded") === "true";
     menu.setAttribute("aria-expanded", !isExpanded);
@@ -313,7 +354,7 @@
     return token;
   }
 
-  // Data fetchers (unchanged behavior)
+  // Data fetchers
   async function fetchRecentlyUpdatedArticles(limit = 5) {
     try {
       const csrfToken = await getCSRFTokenWithCache();
@@ -334,20 +375,33 @@
     }
   }
 
+  // UPDATED: fetch all content tags with translations + pagination
   async function fetchAllContentTags() {
     try {
       const csrfToken = await getCSRFTokenWithCache();
       if (!csrfToken) {
         throw new Error("Could not retrieve CSRF token. User may not be logged in.");
       }
-      const apiUrl = `/api/v2/guide/content_tags?page[size]=30`;
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }
-      });
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      return data.records;
+
+      const records = [];
+      let url = `/api/v2/guide/content_tags?page[size]=100&include=translations`;
+
+      while (url) {
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const data = await res.json();
+
+        if (Array.isArray(data.records)) records.push(...data.records);
+
+        // Cursor pagination support (Zendesk returns links.next)
+        const next = data.links && data.links.next;
+        url = next || null;
+      }
+
+      return records;
     } catch (error) {
       console.error('Error fetching content tags:', error);
       return [];
@@ -374,11 +428,13 @@
     }
   }
 
+  // UPDATED: use locale-aware display names
   async function fetchTopContentTags(limit = 3) {
     try {
       const allTags = await fetchAllContentTags();
       if (!allTags || allTags.length === 0) return [];
 
+      const locale = getCurrentLocale();
       const tagMap = {};
       allTags.forEach(tag => { tagMap[tag.id] = tag; });
 
@@ -394,11 +450,14 @@
         }
       });
 
-      const tagArray = Object.keys(tagCounts).map(tagId => ({
-        id: tagId,
-        name: tagMap[tagId] ? tagMap[tagId].name : 'Unknown Tag',
-        count: tagCounts[tagId]
-      }));
+      const tagArray = Object.keys(tagCounts).map(tagId => {
+        const tag = tagMap[tagId];
+        return {
+          id: tagId,
+          name: getTagDisplayName(tag, locale),
+          count: tagCounts[tagId]
+        };
+      });
 
       tagArray.sort((a, b) => b.count - a.count);
       return tagArray.slice(0, limit);
@@ -408,7 +467,7 @@
     }
   }
 
-  // Renderers (more efficient DOM updates)
+  // Renderers (efficient DOM updates)
   function displayRecentArticles(containerId, articles) {
     const container = qs(`#${containerId}`);
     if (!container) {
