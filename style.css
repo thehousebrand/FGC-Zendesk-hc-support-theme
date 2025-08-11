@@ -727,8 +727,20 @@ ul {
   position: relative;
   background-color: #2E474B;
 }
+.header-support {
+  margin: 0 auto;
+  padding: 32px;
+  position: relative;
+  background-color: #1A3A2D;
+}
+.header-team {
+  margin: 0 auto;
+  padding: 32px;
+  position: relative;
+  background-color: #2C2B3B;
+}
 @media (max-width: 1160px) {
-  .header {
+  .header .header-support .header-team {
     padding: 24px;
     width: 100%;
   }
@@ -751,7 +763,6 @@ ul {
   max-height: 96px;
   vertical-align: middle;
 }
-
 
 @media (max-width: 1024px) {
   .logo img {
@@ -1495,6 +1506,36 @@ a.sign-in:hover{
   background-position: center;
   background-size: cover;*/
   background: linear-gradient(0deg, rgba(46, 71, 75, 0.00) 50%, #2E474B 100%), url($homepage_background_image) lightgray 50% / cover no-repeat;
+  height: 300px;
+  padding: 0 20px;
+  text-align: center;
+  width: 100%;
+  border-bottom: 4px solid #DFAD53;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+.hero-support {
+  /*background-image: url($homepage_background_image);
+  background-position: center;
+  background-size: cover;*/
+  background: linear-gradient(0deg, rgba(26, 58, 45, 0.00) 50%, rgba(26, 58, 45, 1) 100%), url($assets-marble-34-jpg) lightgray 50% / cover no-repeat;
+  height: 300px;
+  padding: 0 20px;
+  text-align: center;
+  width: 100%;
+  border-bottom: 4px solid #DFAD53;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+.hero-team {
+  /*background-image: url($homepage_background_image);
+  background-position: center;
+  background-size: cover;*/
+  background: linear-gradient(0deg, rgba(44, 43, 59, 0.00) 50%, rgba(44, 43, 59, 1) 100%), url($assets-marble-25-jpg) lightgray 50% / cover no-repeat;
   height: 300px;
   padding: 0 20px;
   text-align: center;
