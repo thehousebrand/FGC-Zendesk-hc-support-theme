@@ -740,7 +740,15 @@ ul {
   background-color: #2C2B3B;
 }
 @media (max-width: 1160px) {
-  .header .header-support .header-team {
+  .header {
+    padding: 24px;
+    width: 100%;
+  }
+  .header-team {
+    padding: 24px;
+    width: 100%;
+  }
+  .header-support {
     padding: 24px;
     width: 100%;
   }
@@ -762,7 +770,17 @@ ul {
   padding: 40px 24px;
   background-color: #1A3A2D;
 }
-.search-nav-header .search-nav-header-team .search-nav-header-support .search-container {
+.search-nav-header .search-container {
+    max-width: 1160px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.search-nav-header-team .search-container {
+    max-width: 1160px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.search-nav-header-support .search-container {
     max-width: 1160px;
     margin-left: auto;
     margin-right: auto;
