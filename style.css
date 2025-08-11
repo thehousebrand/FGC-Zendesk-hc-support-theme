@@ -721,34 +721,22 @@ ul {
 }
 
 /***** Header *****/
-.header {
-  margin: 0 auto;
-  padding: 32px;
-  position: relative;
-  background-color: #2E474B;
-}
-.header-support {
-  margin: 0 auto;
-  padding: 32px;
-  position: relative;
-  background-color: #1A3A2D;
-}
+.header,
+.header-support,
 .header-team {
   margin: 0 auto;
   padding: 32px;
   position: relative;
-  background-color: #2C2B3B;
 }
+
+.header { background-color: #2E474B; }
+.header-support { background-color: #1A3A2D; }
+.header-team { background-color: #2C2B3B; }
+
 @media (max-width: 1160px) {
-  .header {
-    padding: 24px;
-    width: 100%;
-  }
+  .header,
+  .header-support,
   .header-team {
-    padding: 24px;
-    width: 100%;
-  }
-  .header-support {
     padding: 24px;
     width: 100%;
   }
@@ -758,32 +746,22 @@ ul {
   justify-content: space-between;
   align-items: center;
 }
-.search-nav-header {
-  padding: 40px 24px;
-  background-color: #2E474B;
-}
-.search-nav-header-team {
-  padding: 40px 24px;
-  background-color: #2C2B3B;
-}
+.search-nav-header,
+.search-nav-header-team,
 .search-nav-header-support {
   padding: 40px 24px;
-  background-color: #1A3A2D;
 }
-.search-nav-header .search-container {
-    max-width: 1160px;
-    margin-left: auto;
-    margin-right: auto;
-}
-.search-nav-header-team .search-container {
-    max-width: 1160px;
-    margin-left: auto;
-    margin-right: auto;
-}
+
+.search-nav-header { background-color: #2E474B; }
+.search-nav-header-team { background-color: #2C2B3B; }
+.search-nav-header-support { background-color: #1A3A2D; }
+
+.search-nav-header .search-container,
+.search-nav-header-team .search-container,
 .search-nav-header-support .search-container {
-    max-width: 1160px;
-    margin-left: auto;
-    margin-right: auto;
+  max-width: 1160px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .logo img {
   max-height: 96px;
@@ -1527,41 +1505,12 @@ a.sign-in:hover{
 }
 
 /***** Hero component *****/
-.hero {
-  /*background-image: url($homepage_background_image);
-  background-position: center;
-  background-size: cover;*/
-  background: linear-gradient(0deg, rgba(46, 71, 75, 0.00) 50%, #2E474B 100%), url($homepage_background_image) lightgray 50% / cover no-repeat;
-  height: 300px;
-  padding: 0 20px;
-  text-align: center;
-  width: 100%;
-  border-bottom: 4px solid #DFAD53;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-}
-.hero-support {
-  /*background-image: url($homepage_background_image);
-  background-position: center;
-  background-size: cover;*/
-  background: linear-gradient(0deg, rgba(26, 58, 45, 0.00) 50%, rgba(26, 58, 45, 1) 100%), url($assets-marble-34-jpg) lightgray 50% / cover no-repeat;
-  height: 300px;
-  padding: 0 20px;
-  text-align: center;
-  width: 100%;
-  border-bottom: 4px solid #DFAD53;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-}
+.hero,
+.hero-support,
 .hero-team {
   /*background-image: url($homepage_background_image);
   background-position: center;
   background-size: cover;*/
-  background: linear-gradient(0deg, rgba(44, 43, 59, 0.00) 50%, rgba(44, 43, 59, 1) 100%), url($assets-marble-25-jpg) lightgray 50% / cover no-repeat;
   height: 300px;
   padding: 0 20px;
   text-align: center;
@@ -1572,6 +1521,11 @@ a.sign-in:hover{
   align-items: center;
   justify-content: flex-end;
 }
+
+.hero { background: linear-gradient(0deg, rgba(46, 71, 75, 0.00) 50%, #2E474B 100%), url($homepage_background_image) lightgray 50% / cover no-repeat; }
+.hero-support { background: linear-gradient(0deg, rgba(26, 58, 45, 0.00) 50%, rgba(26, 58, 45, 1) 100%), url($assets-marble-34-jpg) lightgray 50% / cover no-repeat; }
+.hero-team { background: linear-gradient(0deg, rgba(44, 43, 59, 0.00) 50%, rgba(44, 43, 59, 1) 100%), url($assets-marble-25-jpg) lightgray 50% / cover no-repeat; }
+
 .hero-inner {
   /*position: relative;
   top: 50%;
