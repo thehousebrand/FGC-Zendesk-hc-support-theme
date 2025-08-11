@@ -754,7 +754,15 @@ ul {
   padding: 40px 24px;
   background-color: #2E474B;
 }
-.search-nav-header .search-container {
+.search-nav-header-team {
+  padding: 40px 24px;
+  background-color: #2C2B3B;
+}
+.search-nav-header-support {
+  padding: 40px 24px;
+  background-color: #1A3A2D;
+}
+.search-nav-header .search-nav-header-team .search-nav-header-support .search-container {
     max-width: 1160px;
     margin-left: auto;
     margin-right: auto;
