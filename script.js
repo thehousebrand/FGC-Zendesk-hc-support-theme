@@ -320,26 +320,15 @@
   // Data fetchers (unchanged behavior)
   async function fetchRecentlyUpdatedArticles(limit = 5) {
     try {
-      const csrfToken = await getCSRFTokenWithCache();
-      if (!csrfToken) {
-        throw new Error(
-          "Could not retrieve CSRF token. User may not be logged in."
-        );
-      }
-      const apiUrl = `/api/v2/help_center/articles.json?sort_by=created_at&sort_order=desc&per_page=${limit}`;
-      const response = await fetch(apiUrl, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
-        },
-      });
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      return data.articles;
-    } catch (error) {
-      console.error("Error fetching recent articles:", error);
+      // Use the Search Articles endpoint (published/visible only)
+      const url = `/api/v2/help_center/articles/search.json?sort_by=created_at&sort_order=desc&locale=en-au`;
+      const res = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" }});
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      // `results` is an array of article objects; slice to limit
+      return (data.results || []).slice(0, limit);
+    } catch (err) {
+      console.error("Error fetching recent articles (published only):", err);
       return [];
     }
   }
