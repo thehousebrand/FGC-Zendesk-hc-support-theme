@@ -158,11 +158,14 @@
   {{/if}}
 </div>	
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  const searchInput = document.querySelector('.search input[type="search"]');
-  if (searchInput) {
-    searchInput.placeholder = "Find answers..."; // Change this text!
-  }
-});
-</script>
+{{#is brand.id 733467}}
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.querySelector('.search input[type="search"]');
+    if (searchInput) {
+	  searchInput.placeholder = "Ask a question or view our FAQs"; // Change this text!
+    }
+  });
+  </script>
+{{/is}}
+	  
