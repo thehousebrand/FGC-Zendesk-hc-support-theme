@@ -45,7 +45,7 @@
           </li>
         {{/unless}}
         {{#is brand.id 733467}}
-          <li><a href="{{help_center.url}}/requests/new" class="submit-a-request">Get in touch</a></li>
+          <li><a href="{{help_center.url}}/requests/new" class="submit-a-request">Contact us</a></li>
         {{else}}
           <li>{{link 'new_request' class='submit-a-request'}}</li>
         {{/is}}
@@ -88,7 +88,12 @@
           <li class="nav-divider"></li>
         {{/if}}
         <li class="item">{{link 'community'}}</li>
-        <li class="item">{{link 'new_request' class='submit-a-request'}}</li>
+        <!--<li class="item">{{link 'new_request' class='submit-a-request'}}</li>-->>
+        {{#is brand.id 733467}}
+          <li class="item"><a href="{{help_center.url}}/requests/new" class="submit-a-request">Contact us</a></li>
+        {{else}}
+          <li class="item">{{link 'new_request' class='submit-a-request'}}</li>
+        {{/is}}
         <li class="nav-divider"></li>
         {{#if signed_in}}
           <li class="item">
