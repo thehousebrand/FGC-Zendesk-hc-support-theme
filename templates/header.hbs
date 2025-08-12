@@ -44,7 +44,11 @@
             {{/link}}
           </li>
         {{/unless}}
-        <li>{{link 'new_request' class='submit-a-request'}}</li>
+        {{#is brand.id 733467}}
+          <li><a href="{{help_center.url}}/requests/new" class="submit-a-request">Get in touch</a></li>
+        {{else}}
+          <li>{{link 'new_request' class='submit-a-request'}}</li>
+        {{/is}}
       </ul>
     </nav>
   </div>
