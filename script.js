@@ -318,6 +318,7 @@
   }
 
   // Data fetchers (unchanged behavior)
+  // Updated function to fetch only published articles
   async function fetchRecentlyUpdatedArticles(limit = 5) {
     try {
       const csrfToken = await getCSRFTokenWithCache();
@@ -326,7 +327,11 @@
           "Could not retrieve CSRF token. User may not be logged in."
         );
       }
-      const apiUrl = /api/v2/help_center/articles.json?sort_by=created_at&sort_order=desc&per_page=${limit};
+      
+      // Fetch more articles than needed since we'll filter out drafts
+      const fetchLimit = Math.max(limit * 2, 20); // Fetch 2x or minimum 20 to account for drafts
+      const apiUrl = `/api/v2/help_center/articles.json?sort_by=created_at&sort_order=desc&per_page=${fetchLimit}`;
+      
       const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
@@ -334,13 +339,18 @@
           "X-CSRF-Token": csrfToken,
         },
       });
+      
       if (!response.ok)
-        throw new Error(HTTP error! Status: ${response.status});
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      
       const data = await response.json();
-      // ✅ only keep published articles
-      const published = (data.articles || []).filter(a => a && a.draft === false);
-
-    return published.slice(0, limit);
+      
+      // Filter out draft articles (draft: false means published)
+      const publishedArticles = data.articles.filter(article => article.draft === false);
+      
+      // Return only the requested number of published articles
+      return publishedArticles.slice(0, limit);
+      
     } catch (error) {
       console.error("Error fetching recent articles:", error);
       return [];
