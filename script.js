@@ -533,125 +533,176 @@
   }
 
   // NEW FUNCTION: Fetch all sections from FAQs category
-async function fetchFAQSections() {
-  try {
-    console.log("🔍 Fetching FAQ sections...");
-    
-    // Find FAQ category by name
-    const categories = await fetchCategories();
-    const faqCategory = categories.find(cat => 
-      cat.name.toLowerCase().includes('faq') || 
-      cat.name.toLowerCase().includes('frequently asked questions')
-    );
-    
-    if (!faqCategory) {
-      console.error("❌ FAQ category not found");
+  /* async function fetchFAQSections() {
+    try {
+      console.log("🔍 Fetching FAQ sections...");
+      
+      // Find FAQ category by name
+      const categories = await fetchCategories();
+      const faqCategory = categories.find(cat => 
+        cat.name.toLowerCase().includes('faq') || 
+        cat.name.toLowerCase().includes('frequently asked questions')
+      );
+      
+      if (!faqCategory) {
+        console.error("❌ FAQ category not found");
+        return [];
+      }
+      
+      console.log("✅ Found FAQ category:", faqCategory.name, "ID:", faqCategory.id);
+      
+      // Fetch all sections
+      const allSections = await fetchAllSections();
+      
+      // Filter sections that belong to the FAQ category
+      const faqSections = allSections.filter(section => 
+        section.category_id === faqCategory.id
+      );
+      
+      console.log("✅ Found FAQ sections:", faqSections.length);
+      return faqSections;
+      
+    } catch (error) {
+      console.error("❌ Error fetching FAQ sections:", error);
       return [];
     }
-    
-    console.log("✅ Found FAQ category:", faqCategory.name, "ID:", faqCategory.id);
-    
-    // Fetch all sections
-    const allSections = await fetchAllSections();
-    
-    // Filter sections that belong to the FAQ category
-    const faqSections = allSections.filter(section => 
-      section.category_id === faqCategory.id
-    );
-    
-    console.log("✅ Found FAQ sections:", faqSections.length);
-    return faqSections;
-    
-  } catch (error) {
-    console.error("❌ Error fetching FAQ sections:", error);
-    return [];
   }
-}
-
-// Helper function to fetch all categories
-async function fetchCategories() {
-  try {
-    const apiUrl = `/api/v2/help_center/en-au/categories.json`;
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+  
+  // Helper function to fetch all categories
+  async function fetchCategories() {
+    try {
+      const apiUrl = `/api/v2/help_center/en-au/categories.json`;
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.categories || [];
+      
+    } catch (error) {
+      console.error("❌ Error fetching categories:", error);
+      return [];
+    }
+  }
+  // Helper function to fetch all sections
+  async function fetchAllSections() {
+    try {
+      const apiUrl = `/api/v2/help_center/en-au/sections.json`;
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.sections || [];
+      
+    } catch (error) {
+      console.error("❌ Error fetching sections:", error);
+      return [];
+    }
+  }
+  
+  // Function to display FAQ sections (replaces the recent articles display)
+  function displayFAQSections(containerId, sections) {
+    const container = document.querySelector(`#${containerId}`);
+    if (!container) {
+      console.error(`Container with ID "${containerId}" not found.`);
+      return;
     }
     
-    const data = await response.json();
-    return data.categories || [];
+    container.innerHTML = "";
     
-  } catch (error) {
-    console.error("❌ Error fetching categories:", error);
-    return [];
-  }
-}
-
-// Helper function to fetch all sections
-async function fetchAllSections() {
-  try {
-    const apiUrl = `/api/v2/help_center/en-au/sections.json`;
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    if (!sections || !sections.length) {
+      container.innerHTML = "<p>No FAQ sections found.</p>";
+      return;
+    }
+  
+    const frag = document.createDocumentFragment();
+    
+    sections.forEach((section) => {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+        <article class="article-item">
+          <div class="article-inner">
+            <h3 class="article-title">
+              <a href="${section.html_url}">${section.name}</a>
+            </h3>
+            <p class="article-description">
+              ${section.description || 'Browse articles in this section'}
+            </p>
+          </div>
+        </article>
+      `.trim();
+      frag.appendChild(wrapper.firstElementChild);
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+    container.appendChild(frag);
+  } */
+
+  // OPTIMIZED: Direct fetch using category ID (much faster!)
+  async function fetchFAQSectionsByID(categoryId) {
+    try {
+      console.log("🚀 Fetching FAQ sections directly by category ID:", categoryId);
+      
+      // Fetch all sections and filter by category ID
+      const allSections = await fetchAllSections();
+      const faqSections = allSections.filter(section => 
+        section.category_id === parseInt(categoryId)
+      );
+      
+      console.log("✅ Found FAQ sections:", faqSections.length);
+      return faqSections;
+      
+    } catch (error) {
+      console.error("❌ Error fetching FAQ sections by ID:", error);
+      return [];
     }
-    
-    const data = await response.json();
-    return data.sections || [];
-    
-  } catch (error) {
-    console.error("❌ Error fetching sections:", error);
-    return [];
-  }
-}
-
-// Function to display FAQ sections (replaces the recent articles display)
-function displayFAQSections(containerId, sections) {
-  const container = document.querySelector(`#${containerId}`);
-  if (!container) {
-    console.error(`Container with ID "${containerId}" not found.`);
-    return;
   }
   
-  container.innerHTML = "";
-  
-  if (!sections || !sections.length) {
-    container.innerHTML = "<p>No FAQ sections found.</p>";
-    return;
+  // ALTERNATIVE: Even faster - fetch sections directly from category endpoint
+  async function fetchFAQSectionsDirectly(categoryId) {
+    try {
+      console.log("⚡ Fetching FAQ sections directly from category endpoint:", categoryId);
+      
+      // This endpoint gets sections directly from a specific category
+      const apiUrl = `/api/v2/help_center/en-au/categories/${categoryId}/sections.json`;
+      
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const sections = data.sections || [];
+      
+      console.log("✅ Found FAQ sections (direct):", sections.length);
+      return sections;
+      
+    } catch (error) {
+      console.error("❌ Error fetching sections directly:", error);
+      // Fallback to the previous method
+      return await fetchFAQSectionsByID(categoryId);
+    }
   }
-
-  const frag = document.createDocumentFragment();
-  
-  sections.forEach((section) => {
-    const wrapper = document.createElement("div");
-    wrapper.innerHTML = `
-      <article class="article-item">
-        <div class="article-inner">
-          <h3 class="article-title">
-            <a href="${section.html_url}">${section.name}</a>
-          </h3>
-          <p class="article-description">
-            ${section.description || 'Browse articles in this section'}
-          </p>
-        </div>
-      </article>
-    `.trim();
-    frag.appendChild(wrapper.firstElementChild);
-  });
-  
-  container.appendChild(frag);
-}
   
   // Search helpers
   let searchFormFilledClassName = "search-has-value";
@@ -1054,42 +1105,52 @@ function displayFAQSections(containerId, sections) {
     
     // FIND AND REPLACE YOUR EXISTING bootContent FUNCTION WITH THIS:
     // Content: articles + top tags
+    (// UPDATED bootContent function with hardcoded category ID
     (async function bootContent() {
-  try {
-    console.log("🚀 Loading content for all users...");
+      try {
+        console.log("🚀 Loading content for all users...");
+        
+        // REPLACE 'YOUR_FAQ_CATEGORY_ID' with the actual ID you found
+        const FAQ_CATEGORY_ID = 12279744997263; // ← PUT YOUR CATEGORY ID HERE
+        
+        // Use the optimized direct fetch
+        const faqSections = await fetchFAQSectionsDirectly(FAQ_CATEGORY_ID);
+        
+        if (faqSections && faqSections.length > 0) {
+          console.log("✅ Displaying FAQ sections:", faqSections.length);
+          displayFAQSections("recent-articles", faqSections);
+        } else {
+          console.log("⚠️ No FAQ sections found, falling back to dynamic search");
+          // Fallback to the original dynamic method
+          const faqSections = await fetchFAQSections();
+          if (faqSections && faqSections.length > 0) {
+            displayFAQSections("recent-articles", faqSections);
+          } else {
+            const container = document.querySelector("#recent-articles");
+            if (container) {
+              container.innerHTML = "<p>No FAQ sections found.</p>";
+            }
+          }
+        }
     
-    // CHANGED: Fetch FAQ sections instead of recent articles
-    const faqSections = await fetchFAQSections();
-    if (faqSections && faqSections.length > 0) {
-      console.log("✅ Displaying FAQ sections:", faqSections.length);
-      displayFAQSections("recent-articles", faqSections); // Using same container ID
-    } else {
-      console.log("⚠️ No FAQ sections found");
-      const container = document.querySelector("#recent-articles");
-      if (container) {
-        container.innerHTML = "<p>No FAQ sections found.</p>";
-      }
-    }
-
-    // Keep the top tags functionality if you have it
-    try {
-      const topTags = await fetchTopContentTags(3);
-      if (topTags && topTags.length > 0) {
-        console.log("✅ Displaying top tags:", topTags.length);
-        displayTopTagLinks("top-tags", topTags);
-      }
-    } catch (error) {
-      console.log("⚠️ Top tags not available");
-    }
-    
-  } catch (error) {
-    console.error("❌ Failed to load content:", error);
-    const sectionsContainer = document.querySelector("#recent-articles");
-    if (sectionsContainer) {
-      sectionsContainer.innerHTML =
-        "<p>Unable to load FAQ sections. Please try again later.</p>";
-    }
-  }
-})();
+        // Keep the top tags functionality
+        try {
+          const topTags = await fetchTopContentTags(3);
+          if (topTags && topTags.length > 0) {
+            console.log("✅ Displaying top tags:", topTags.length);
+            displayTopTagLinks("top-tags", topTags);
+          }
+        } catch (error) {
+          console.log("⚠️ Top tags not available");
+        }
+        
+      } catch (error) {
+        console.error("❌ Failed to load content:", error);
+        const sectionsContainer = document.querySelector("#recent-articles");
+        if (sectionsContainer) {
+          sectionsContainer.innerHTML =
+            "<p>Unable to load FAQ sections. Please try again later.</p>";
+        }
+  })();
   });
 })();
