@@ -532,65 +532,6 @@
     container.appendChild(frag);
   }
 
-  // NEW FUNCTION: Fetch all sections from FAQs category
-  /* async function fetchFAQSections() {
-    try {
-      console.log("🔍 Fetching FAQ sections...");
-      
-      // Find FAQ category by name
-      const categories = await fetchCategories();
-      const faqCategory = categories.find(cat => 
-        cat.name.toLowerCase().includes('faq') || 
-        cat.name.toLowerCase().includes('frequently asked questions')
-      );
-      
-      if (!faqCategory) {
-        console.error("❌ FAQ category not found");
-        return [];
-      }
-      
-      console.log("✅ Found FAQ category:", faqCategory.name, "ID:", faqCategory.id);
-      
-      // Fetch all sections
-      const allSections = await fetchAllSections();
-      
-      // Filter sections that belong to the FAQ category
-      const faqSections = allSections.filter(section => 
-        section.category_id === faqCategory.id
-      );
-      
-      console.log("✅ Found FAQ sections:", faqSections.length);
-      return faqSections;
-      
-    } catch (error) {
-      console.error("❌ Error fetching FAQ sections:", error);
-      return [];
-    }
-  }
-  
-  // Helper function to fetch all categories
-  async function fetchCategories() {
-    try {
-      const apiUrl = `/api/v2/help_center/en-au/categories.json`;
-      const response = await fetch(apiUrl, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.categories || [];
-      
-    } catch (error) {
-      console.error("❌ Error fetching categories:", error);
-      return [];
-    }
-  }
   // Helper function to fetch all sections
   async function fetchAllSections() {
     try {
@@ -614,43 +555,6 @@
       return [];
     }
   }
-  
-  // Function to display FAQ sections (replaces the recent articles display)
-  function displayFAQSections(containerId, sections) {
-    const container = document.querySelector(`#${containerId}`);
-    if (!container) {
-      console.error(`Container with ID "${containerId}" not found.`);
-      return;
-    }
-    
-    container.innerHTML = "";
-    
-    if (!sections || !sections.length) {
-      container.innerHTML = "<p>No FAQ sections found.</p>";
-      return;
-    }
-  
-    const frag = document.createDocumentFragment();
-    
-    sections.forEach((section) => {
-      const wrapper = document.createElement("div");
-      wrapper.innerHTML = `
-        <article class="article-item">
-          <div class="article-inner">
-            <h3 class="article-title">
-              <a href="${section.html_url}">${section.name}</a>
-            </h3>
-            <p class="article-description">
-              ${section.description || 'Browse articles in this section'}
-            </p>
-          </div>
-        </article>
-      `.trim();
-      frag.appendChild(wrapper.firstElementChild);
-    });
-    
-    container.appendChild(frag);
-  } */
 
   // OPTIMIZED: Direct fetch using category ID (much faster!)
   async function fetchFAQSectionsByID(categoryId) {
@@ -702,6 +606,43 @@
       // Fallback to the previous method
       return await fetchFAQSectionsByID(categoryId);
     }
+  }
+
+  // Function to display FAQ sections (replaces the recent articles display)
+  function displayFAQSections(containerId, sections) {
+    const container = qs(`#${containerId}`);
+    if (!container) {
+      console.error(`Container with ID "${containerId}" not found.`);
+      return;
+    }
+    
+    container.innerHTML = "";
+    
+    if (!sections || !sections.length) {
+      container.innerHTML = "<p>No FAQ sections found.</p>";
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    
+    sections.forEach((section) => {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+        <article class="article-item">
+          <div class="article-inner">
+            <h3 class="article-title">
+              <a href="${section.html_url}">${section.name}</a>
+            </h3>
+            <p class="article-description">
+              ${section.description || 'Browse articles in this section'}
+            </p>
+          </div>
+        </article>
+      `.trim();
+      frag.appendChild(wrapper.firstElementChild);
+    });
+    
+    container.appendChild(frag);
   }
   
   // Search helpers
@@ -1103,37 +1044,35 @@
       }
     })();
     
-    // FIND AND REPLACE YOUR EXISTING bootContent FUNCTION WITH THIS:
-    // Content: articles + top tags
-    (// UPDATED bootContent function with hardcoded category ID
+    // FIXED: Content loading with proper FAQ sections display
     (async function bootContent() {
       try {
         console.log("🚀 Loading content for all users...");
         
-        // REPLACE 'YOUR_FAQ_CATEGORY_ID' with the actual ID you found
-        const FAQ_CATEGORY_ID = 12279744997263; // ← PUT YOUR CATEGORY ID HERE
+        // Your FAQ category ID
+        const FAQ_CATEGORY_ID = 12279744997263;
         
-        // Use the optimized direct fetch
+        // Try to fetch FAQ sections directly from category
         const faqSections = await fetchFAQSectionsDirectly(FAQ_CATEGORY_ID);
         
         if (faqSections && faqSections.length > 0) {
           console.log("✅ Displaying FAQ sections:", faqSections.length);
           displayFAQSections("recent-articles", faqSections);
         } else {
-          console.log("⚠️ No FAQ sections found, falling back to dynamic search");
-          // Fallback to the original dynamic method
-          const faqSections = await fetchFAQSections();
-          if (faqSections && faqSections.length > 0) {
-            displayFAQSections("recent-articles", faqSections);
+          console.log("⚠️ No FAQ sections found, trying fallback method");
+          // Fallback: fetch by filtering all sections
+          const fallbackSections = await fetchFAQSectionsByID(FAQ_CATEGORY_ID);
+          if (fallbackSections && fallbackSections.length > 0) {
+            displayFAQSections("recent-articles", fallbackSections);
           } else {
-            const container = document.querySelector("#recent-articles");
+            const container = qs("#recent-articles");
             if (container) {
               container.innerHTML = "<p>No FAQ sections found.</p>";
             }
           }
         }
-    
-        // Keep the top tags functionality
+
+        // Keep the top tags functionality for team brand
         try {
           const topTags = await fetchTopContentTags(3);
           if (topTags && topTags.length > 0) {
@@ -1141,16 +1080,17 @@
             displayTopTagLinks("top-tags", topTags);
           }
         } catch (error) {
-          console.log("⚠️ Top tags not available");
+          console.log("⚠️ Top tags not available (this is normal for support brand)");
         }
         
       } catch (error) {
         console.error("❌ Failed to load content:", error);
-        const sectionsContainer = document.querySelector("#recent-articles");
+        const sectionsContainer = qs("#recent-articles");
         if (sectionsContainer) {
           sectionsContainer.innerHTML =
             "<p>Unable to load FAQ sections. Please try again later.</p>";
         }
-  })();
+      }
+    })();
   });
 })();
