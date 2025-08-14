@@ -5991,8 +5991,8 @@ svg[data-garden-id='dropdowns.combobox.input_icon'] {
 }
 
 .faq-section-icon svg{
-  width:clamp(1.2rem,4vw,1.2rem);
-  height:clamp(1.2rem,4vw,1.2rem);
+  width:clamp(1.4rem,4vw,1.6rem);
+  height:clamp(1.4rem,4vw,1.6rem);
 }
 .card-header svg{
   width:clamp(1.6rem, 4vw, 2.0rem);
