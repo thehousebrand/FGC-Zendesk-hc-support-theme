@@ -5312,20 +5312,32 @@ zd-summary-block {
 
 
 /******** Resource Cards ******/
-.resource-cards {
+/*.resource-cards {
   max-width: none;
   margin-left: auto;
   margin-right: auto;
   display: flex;
   gap: 8px;
+}*/
+.resource-cards {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.card-link {
+/*.card-link {
   width: calc(33% - 5.33px);
   text-decoration: none;
   color: inherit;
   display: block;
-  /*transition: transform 0.2s ease, box-shadow 0.2s ease;*/
+  transition: outline-width 0.2s ease;
+  border-radius: 4px;
+}*/
+.card-link {
+  flex: 1; /* This makes each card take equal width */
+  text-decoration: none;
   transition: outline-width 0.2s ease;
   border-radius: 4px;
 }
@@ -5341,7 +5353,7 @@ zd-summary-block {
   outline-offset: 0px;
 }
 
-.resource-card {
+/*.resource-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -5351,35 +5363,45 @@ zd-summary-block {
   border-radius: 4px;
   background-color: #ffeacb;
   width: 100%;
+}*/
+.resource-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  height: 200px;
+  box-sizing: border-box;
+  padding: 16px;
+  border-radius: 4px;
+  background-color: #ffeacb;
 }
+
+/* Remove any unwanted margins/padding */
+.resource-cards .card-link:last-child {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+
 @media (max-width: 640px) {
     .resource-card {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         align-items: flex-start;
         height: fit-content;
-        padding: 16px;
+        padding: 12px;
         border-radius: 4px;
         background-color: #ffeacb;
         width: 100%;
         justify-content: flex-start;
-        gap: 8px;
+        gap: 4px;
     }
-  .card-icon{
-    width: 24px;
-    height: 24px;
-    margin-top: 4px;
-  }
-}
-.card-header {
-  margin-bottom: 8px;
+  	.card-header {
+  		margin: 0;
+		}
 }
 
-.card-icon {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 8px;
-}
 
 .card-content {
   display: flex;
@@ -5969,10 +5991,14 @@ svg[data-garden-id='dropdowns.combobox.input_icon'] {
 }
 
 .faq-section-icon svg{
-  width:clamp(1.2rem,4vw,1.4rem);
-  height:clamp(1.2rem,4vw,1.4rem);
+  width:clamp(1.2rem,4vw,1.2rem);
+  height:clamp(1.2rem,4vw,1.2rem);
 }
 .card-header svg{
   width:clamp(1.6rem, 4vw, 2.0rem);
   height:clamp(1.6rem, 4vw, 2.0rem);
+}
+
+.featured-container {
+      margin-bottom: 40px;
 }
