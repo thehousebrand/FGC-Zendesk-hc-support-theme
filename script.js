@@ -857,7 +857,7 @@
 
     // Navigation
     (function nav() {
-      const menuButton = qs(".nav-header .menu-button-mobile");
+      const menuButton = qs(".header-nav .menu-button-mobile");
       const menuList = qs("#user-nav-mobile");
       if (menuButton && menuList) {
         menuButton.addEventListener("click", (event) => {
