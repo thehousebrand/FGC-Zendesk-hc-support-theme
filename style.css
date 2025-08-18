@@ -899,7 +899,7 @@ a.sign-in:hover{
   border-radius: 50%;
 }
 .nav-wrapper-mobile .menu-button-mobile[aria-expanded=true] .icon-menu {
-  background: #f3f3f3;
+  background: #000000;
 }
 .nav-wrapper-mobile .menu-list-mobile {
   position: absolute;
