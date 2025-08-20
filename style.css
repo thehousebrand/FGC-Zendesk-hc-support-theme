@@ -6002,16 +6002,3 @@ svg[data-garden-id='dropdowns.combobox.input_icon'] {
 .featured-container {
       margin-bottom: 40px;
 }
-
-/* Hide CC field by various selectors */
-[name="request[collaborators][]"],
-input[name="request[collaborators][]"],
-[data-garden-id="forms.field"]:has([name="request[collaborators][]"]),
-label:contains("CC") {
-    display: none !important;
-}
-
-/* Hide parent containers that might contain the CC field */
-[data-garden-id="forms.field"]:has(label:contains("CC")) {
-    display: none !important;
-}
