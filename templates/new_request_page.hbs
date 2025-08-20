@@ -53,6 +53,14 @@
     }
   }
 
+  // Function to hide CC field globally
+  function hideCCFieldGlobally() {
+    // Hide CC field if it exists in formSettings
+    if (formSettings.cc_field) {
+      formSettings.cc_field.hidden = true;
+    }
+  }
+
   // Function to dynamically update ticket fields based on ticket_form_id
   function updateTicketFields(ticketFormId) {
     switch (ticketFormId) {
@@ -311,59 +319,100 @@
     }
   }
 
-  function hideFields() {
-  // Hide ticket fields
-  formSettings.ticket_fields.forEach(field => {
-    if (field.hidden) {
-      const fieldElement = document.querySelector(`[name="${field.name}"]`);
-      if (fieldElement) {
-        const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
+  function hideCCField() {
+    // Multiple approaches to hide the CC field
+    const ccSelectors = [
+      '[name="request[collaborators][]"]',
+      'input[name="request[collaborators][]"]',
+      '[data-name="cc"]',
+      'label[for*="collaborator"]'
+    ];
+
+    ccSelectors.forEach(selector => {
+      const ccElements = document.querySelectorAll(selector);
+      ccElements.forEach(ccElement => {
+        if (ccElement) {
+          const parentElement = ccElement.closest('[data-garden-id="forms.field"]') ||
+                               ccElement.closest('.form-field') ||
+                               ccElement.closest('div[class*="field"]') ||
+                               ccElement.closest('div');
+          if (parentElement) {
+            parentElement.style.display = "none";
+          }
+        }
+      });
+    });
+
+    // Hide by label text
+    const labels = document.querySelectorAll('label');
+    labels.forEach(label => {
+      if (label.textContent && label.textContent.trim() === 'CC') {
+        const parentElement = label.closest('[data-garden-id="forms.field"]') ||
+                             label.closest('.form-field') ||
+                             label.closest('div[class*="field"]') ||
+                             label.closest('div');
         if (parentElement) {
-          parentElement.style.display = "none"; // Hide the parent element
-          if(field.name === "request[subject]") {
-            hideSuggestedArticles();
+          parentElement.style.display = "none";
+        }
+      }
+    });
+
+    // CSS injection as backup
+    if (!document.getElementById('hide-cc-style')) {
+      const style = document.createElement('style');
+      style.id = 'hide-cc-style';
+      style.type = 'text/css';
+      style.innerHTML = `
+        [name="request[collaborators][]"],
+        input[name="request[collaborators][]"],
+        [data-garden-id="forms.field"]:has([name="request[collaborators][]"]) {
+          display: none !important;
+        }
+        label:contains("CC") {
+          display: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+  function hideFields() {
+    // Hide ticket fields
+    formSettings.ticket_fields.forEach(field => {
+      if (field.hidden) {
+        const fieldElement = document.querySelector(`[name="${field.name}"]`);
+        if (fieldElement) {
+          const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
+          if (parentElement) {
+            parentElement.style.display = "none"; // Hide the parent element
+  					if(field.name === "request[subject]") {
+  						hideSuggestedArticles();
+  					}
           }
         }
       }
-    }
-  });
+    });
 
-  // Hide CC field - multiple selectors to catch different implementations
-  const ccSelectors = [
-    '[name="request[cc]"]',
-    '#request_cc',
-    '[data-name="cc"]',
-    'input[placeholder*="CC"]',
-    'input[placeholder*="cc"]',
-    'label[for="request_cc"]'
-  ];
+    // Hide CC field
+    hideCCField();
 
-  ccSelectors.forEach(selector => {
-    const ccElement = document.querySelector(selector);
-    if (ccElement) {
-      const parentElement = ccElement.closest('[data-garden-id="forms.field"]') || 
-                           ccElement.closest('.form-field') ||
-                           ccElement.closest('div[class*="field"]');
-      if (parentElement) {
-        parentElement.style.display = "none";
+    // Hide attachments field if marked as hidden
+    if (formSettings.attachments_field && formSettings.attachments_field.hidden) {
+      const attachmentsElement = document.querySelector(`[data-garden-id="forms.file_upload"]`);
+      if (attachmentsElement) {
+        const parentElement = attachmentsElement.closest('[data-garden-id="forms.field"]');
+        if (parentElement) {
+          parentElement.style.display = "none"; // Hide the parent element
+        }
       }
     }
-  });
-
-  // Hide attachments field if marked as hidden
-  if (formSettings.attachments_field && formSettings.attachments_field.hidden) {
-    const attachmentsElement = document.querySelector(`[data-garden-id="forms.file_upload"]`);
-    if (attachmentsElement) {
-      const parentElement = attachmentsElement.closest('[data-garden-id="forms.field"]');
-      if (parentElement) {
-        parentElement.style.display = "none"; // Hide the parent element
-      }
+  	if (formSettings.attachments_field && formSettings.attachments_field.required) {
+  		requireAttachments();
     }
   }
-  if (formSettings.attachments_field && formSettings.attachments_field.required) {
-    requireAttachments();
-  }
-}
+
+  // Hide CC field globally before applying other customizations
+  hideCCFieldGlobally();
 
   // Apply dynamic updates to ticket fields
   if (ticketFormId) {
@@ -395,5 +444,36 @@
 
   renderNewRequestForm(settings, props, container);
   
+  // Set up MutationObserver to watch for CC field appearing
+  const ccObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      mutation.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) {
+          // Check if this node contains the CC field
+          const ccField = node.querySelector ? node.querySelector('[name="request[collaborators][]"]') : null;
+          if (ccField) {
+            hideCCField();
+          }
+          // Also check if the node itself is the CC field
+          if (node.matches && node.matches('[name="request[collaborators][]"]')) {
+            hideCCField();
+          }
+        }
+      });
+    });
+  });
+
+  // Start observing changes to the form container
+  ccObserver.observe(container, {
+    childList: true,
+    subtree: true
+  });
+
   waitForFormRendering(container, hideFields);
+  
+  // Additional attempts to hide CC field with delays
+  setTimeout(hideCCField, 100);
+  setTimeout(hideCCField, 500);
+  setTimeout(hideCCField, 1000);
+  setTimeout(hideCCField, 2000);
 </script>
