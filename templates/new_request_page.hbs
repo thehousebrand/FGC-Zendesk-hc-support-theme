@@ -280,36 +280,58 @@
   }
 
   function hideFields() {
-    // Hide ticket fields
-    formSettings.ticket_fields.forEach(field => {
-      if (field.hidden) {
-        const fieldElement = document.querySelector(`[name="${field.name}"]`);
-        if (fieldElement) {
-          const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
-          if (parentElement) {
-            parentElement.style.display = "none"; // Hide the parent element
-  					if(field.name === "request[subject]") {
-  						hideSuggestedArticles();
-  					}
+  // Hide ticket fields
+  formSettings.ticket_fields.forEach(field => {
+    if (field.hidden) {
+      const fieldElement = document.querySelector(`[name="${field.name}"]`);
+      if (fieldElement) {
+        const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
+        if (parentElement) {
+          parentElement.style.display = "none"; // Hide the parent element
+          if(field.name === "request[subject]") {
+            hideSuggestedArticles();
           }
         }
       }
-    });
+    }
+  });
 
-    // Hide attachments field if marked as hidden
-    if (formSettings.attachments_field && formSettings.attachments_field.hidden) {
-      const attachmentsElement = document.querySelector(`[data-garden-id="forms.file_upload"]`);
-      if (attachmentsElement) {
-        const parentElement = attachmentsElement.closest('[data-garden-id="forms.field"]');
-        if (parentElement) {
-          parentElement.style.display = "none"; // Hide the parent element
-        }
+  // Hide CC field - multiple selectors to catch different implementations
+  const ccSelectors = [
+    '[name="request[cc]"]',
+    '#request_cc',
+    '[data-name="cc"]',
+    'input[placeholder*="CC"]',
+    'input[placeholder*="cc"]',
+    'label[for="request_cc"]'
+  ];
+
+  ccSelectors.forEach(selector => {
+    const ccElement = document.querySelector(selector);
+    if (ccElement) {
+      const parentElement = ccElement.closest('[data-garden-id="forms.field"]') || 
+                           ccElement.closest('.form-field') ||
+                           ccElement.closest('div[class*="field"]');
+      if (parentElement) {
+        parentElement.style.display = "none";
       }
     }
-  	if (formSettings.attachments_field && formSettings.attachments_field.required) {
-  		requireAttachments();
+  });
+
+  // Hide attachments field if marked as hidden
+  if (formSettings.attachments_field && formSettings.attachments_field.hidden) {
+    const attachmentsElement = document.querySelector(`[data-garden-id="forms.file_upload"]`);
+    if (attachmentsElement) {
+      const parentElement = attachmentsElement.closest('[data-garden-id="forms.field"]');
+      if (parentElement) {
+        parentElement.style.display = "none"; // Hide the parent element
+      }
     }
   }
+  if (formSettings.attachments_field && formSettings.attachments_field.required) {
+    requireAttachments();
+  }
+}
 
   // Apply dynamic updates to ticket fields
   if (ticketFormId) {
