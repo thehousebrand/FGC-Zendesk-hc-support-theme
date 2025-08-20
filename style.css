@@ -6002,3 +6002,8 @@ svg[data-garden-id='dropdowns.combobox.input_icon'] {
 .featured-container {
       margin-bottom: 40px;
 }
+
+[data-garden-id="forms.field"]:has([name="request[cc]"]),
+[data-garden-id="forms.field"]:has(#request_cc) {
+    display: none !important;
+}
