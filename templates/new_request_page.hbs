@@ -53,6 +53,14 @@
     }
   }
 
+  // Function to hide CC field globally
+  function hideCCFieldGlobally() {
+    // Hide CC field if it exists in formSettings
+    if (formSettings.cc_field) {
+      formSettings.cc_field.hidden = true;
+    }
+  }
+
   // Function to dynamically update ticket fields based on ticket_form_id
   function updateTicketFields(ticketFormId) {
     switch (ticketFormId) {
@@ -199,38 +207,6 @@
         }
         break;
 
-		case "13537787922575": // Equipment request form
-        formSettings.ticket_fields.forEach(field => {
-          if (field.name === "request[subject]") {
-            field.value = "Equipment loan request"; // Set default value
-            field.hidden = true; // Mark as hidden (future implementation)
-          }
-          if (field.name === "request[description]") {
-            field.value = "Additional information"; // Set default value
-            field.description = "Please enter any additional details below (including furniture type, if selected).";
-          }
-        });
-        if (formSettings.attachments_field) {
-          formSettings.attachments_field.hidden = true; // Hide attachments
-        }
-        break;
-
-		case "12846180147727": // Content request
-        formSettings.ticket_fields.forEach(field => {
-          if (field.name === "request[subject]") {
-            field.value = "Content request"; // Set default value
-            field.hidden = true; // Mark as hidden (future implementation)
-          }
-          //if (field.name === "request[description]") {
-          //  field.value = "Additional information"; // Set default value
-          //  field.description = "Please enter any additional details below (including furniture type, if selected).";
-          //}
-        });
-        //if (formSettings.attachments_field) {
-        //  formSettings.attachments_field.hidden = true; // Hide attachments
-        //}
-        break;
-
       default:
         // No customization for other ticket_form_ids
         break;
@@ -312,58 +288,77 @@
   }
 
   function hideFields() {
-  // Hide ticket fields
-  formSettings.ticket_fields.forEach(field => {
-    if (field.hidden) {
-      const fieldElement = document.querySelector(`[name="${field.name}"]`);
-      if (fieldElement) {
-        const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
-        if (parentElement) {
-          parentElement.style.display = "none"; // Hide the parent element
-          if(field.name === "request[subject]") {
-            hideSuggestedArticles();
+    // Hide ticket fields
+    formSettings.ticket_fields.forEach(field => {
+      if (field.hidden) {
+        const fieldElement = document.querySelector(`[name="${field.name}"]`);
+        if (fieldElement) {
+          const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
+          if (parentElement) {
+            parentElement.style.display = "none"; // Hide the parent element
+  					if(field.name === "request[subject]") {
+  						hideSuggestedArticles();
+  					}
           }
         }
       }
-    }
-  });
+    });
 
-  // Hide CC field - multiple selectors to catch different implementations
-  const ccSelectors = [
-    '[name="request[cc]"]',
-    '#request_cc',
-    '[data-name="cc"]',
-    'input[placeholder*="CC"]',
-    'input[placeholder*="cc"]',
-    'label[for="request_cc"]'
-  ];
+    // Hide CC field - target the collaborators field specifically
+    const ccSelectors = [
+      '[name="request[collaborators][]"]',
+      'input[name="request[collaborators][]"]',
+      '[data-name="cc"]',
+      'label[for*="collaborator"]',
+      'label:contains("CC")'
+    ];
 
-  ccSelectors.forEach(selector => {
-    const ccElement = document.querySelector(selector);
-    if (ccElement) {
-      const parentElement = ccElement.closest('[data-garden-id="forms.field"]') || 
-                           ccElement.closest('.form-field') ||
-                           ccElement.closest('div[class*="field"]');
-      if (parentElement) {
-        parentElement.style.display = "none";
+    ccSelectors.forEach(selector => {
+      const ccElement = document.querySelector(selector);
+      if (ccElement) {
+        const parentElement = ccElement.closest('[data-garden-id="forms.field"]') ||
+                             ccElement.closest('.form-field') ||
+                             ccElement.closest('div[class*="field"]') ||
+                             ccElement.closest('div');
+        if (parentElement) {
+          parentElement.style.display = "none";
+        }
+      }
+    });
+
+    // Additional approach - hide by field label text
+    setTimeout(() => {
+      const labels = document.querySelectorAll('label');
+      labels.forEach(label => {
+        if (label.textContent.trim() === 'CC') {
+          const parentElement = label.closest('[data-garden-id="forms.field"]') ||
+                               label.closest('.form-field') ||
+                               label.closest('div[class*="field"]') ||
+                               label.closest('div');
+          if (parentElement) {
+            parentElement.style.display = "none";
+          }
+        }
+      });
+    }, 500);
+
+    // Hide attachments field if marked as hidden
+    if (formSettings.attachments_field && formSettings.attachments_field.hidden) {
+      const attachmentsElement = document.querySelector(`[data-garden-id="forms.file_upload"]`);
+      if (attachmentsElement) {
+        const parentElement = attachmentsElement.closest('[data-garden-id="forms.field"]');
+        if (parentElement) {
+          parentElement.style.display = "none"; // Hide the parent element
+        }
       }
     }
-  });
-
-  // Hide attachments field if marked as hidden
-  if (formSettings.attachments_field && formSettings.attachments_field.hidden) {
-    const attachmentsElement = document.querySelector(`[data-garden-id="forms.file_upload"]`);
-    if (attachmentsElement) {
-      const parentElement = attachmentsElement.closest('[data-garden-id="forms.field"]');
-      if (parentElement) {
-        parentElement.style.display = "none"; // Hide the parent element
-      }
+  	if (formSettings.attachments_field && formSettings.attachments_field.required) {
+  		requireAttachments();
     }
   }
-  if (formSettings.attachments_field && formSettings.attachments_field.required) {
-    requireAttachments();
-  }
-}
+
+  // Hide CC field globally before applying other customizations
+  hideCCFieldGlobally();
 
   // Apply dynamic updates to ticket fields
   if (ticketFormId) {
