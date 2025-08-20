@@ -215,6 +215,22 @@
         }
         break;
 
+		case "12846180147727": // Content request
+        formSettings.ticket_fields.forEach(field => {
+          if (field.name === "request[subject]") {
+            field.value = "Content request"; // Set default value
+            field.hidden = true; // Mark as hidden (future implementation)
+          }
+          //if (field.name === "request[description]") {
+          //  field.value = "Additional information"; // Set default value
+          //  field.description = "Please enter any additional details below (including furniture type, if selected).";
+          //}
+        });
+        //if (formSettings.attachments_field) {
+        //  formSettings.attachments_field.hidden = true; // Hide attachments
+        //}
+        break;
+
       default:
         // No customization for other ticket_form_ids
         break;
