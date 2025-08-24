@@ -68,6 +68,9 @@
             field.description = "Please enter the details of your enquiry.";
           }
         });
+        if (formSettings.cc_field) {
+          formSettings.cc_field.hidden = true; // Hide CC field
+        }
         break;
 
       case "12805668413199": // Website update request
@@ -312,10 +315,10 @@
   }
 
   function hideFields() {
-  // Hide ticket fields
-  formSettings.ticket_fields.forEach(field => {
-    if (field.hidden) {
-      const fieldElement = document.querySelector(`[name="${field.name}"]`);
+    // Hide ticket fields
+    formSettings.ticket_fields.forEach(field => {
+      if (field.hidden) {
+        const fieldElement = document.querySelector(`[name="${field.name}"]`);
       if (fieldElement) {
         const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
         if (parentElement) {
@@ -328,27 +331,25 @@
     }
   });
 
-  // Hide CC field - multiple selectors to catch different implementations
-  const ccSelectors = [
-    '[name="request[cc]"]',
-    '#request_cc',
-    '[data-name="cc"]',
-    'input[placeholder*="CC"]',
-    'input[placeholder*="cc"]',
-    'label[for="request_cc"]'
-  ];
-
-  ccSelectors.forEach(selector => {
-    const ccElement = document.querySelector(selector);
-    if (ccElement) {
-      const parentElement = ccElement.closest('[data-garden-id="forms.field"]') || 
-                           ccElement.closest('.form-field') ||
-                           ccElement.closest('div[class*="field"]');
-      if (parentElement) {
-        parentElement.style.display = "none";
+  // Hide CC field if marked as hidden
+  if (formSettings.cc_field && formSettings.cc_field.hidden) {
+    if (field.name === "cc_field") {
+      // Special handling for CC field as it doesn't have a name attribute
+      try {
+        const labels = document.querySelectorAll('[data-garden-id="forms.field"] label');
+        fieldElement = Array.from(labels).find(el => el.textContent.trim() === "CC") || null;
+        if (fieldElement) {
+          const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
+          if (parentElement) {
+            parentElement.style.display = "none"; // Hide the parent element
+          }
+        }
+      } catch (error) {
+        console.warn("Error finding CC field:", error);
+        fieldElement = null;
       }
     }
-  });
+  }
 
   // Hide attachments field if marked as hidden
   if (formSettings.attachments_field && formSettings.attachments_field.hidden) {
