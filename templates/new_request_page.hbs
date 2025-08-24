@@ -237,17 +237,16 @@
         //  formSettings.attachments_field.hidden = true; // Hide attachments
         //}
         break;
-
-      default:
-        // No customization for other ticket_form_ids
-        break;
-    }
-
     case "12230952198799": //Technical support request
       if(formSettings.cc_field) {
         formSettings.cc_field.hidden = false; // Show CC field
       }
       break;
+
+    default:
+      // No customization for other ticket_form_ids
+      break;
+    }
   }
 
   function waitForFormRendering(formContainer, callback, interval = 200, timeout = 5000) {
