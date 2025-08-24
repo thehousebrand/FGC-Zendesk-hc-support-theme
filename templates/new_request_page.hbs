@@ -55,6 +55,10 @@
 
   // Function to dynamically update ticket fields based on ticket_form_id
   function updateTicketFields(ticketFormId) {
+    if (formSettings.cc_field) {
+      formSettings.cc_field.hidden = true; // Show CC field
+    }
+
     switch (ticketFormId) {
       case "6207954525583": // Default Ticket Form
         formSettings.ticket_fields.forEach(field => {
@@ -69,7 +73,7 @@
           }
         });
         if (formSettings.cc_field) {
-          formSettings.cc_field.hidden = true; // Hide CC field
+          //formSettings.cc_field.hidden = false; // Show CC field
         }
         break;
 
