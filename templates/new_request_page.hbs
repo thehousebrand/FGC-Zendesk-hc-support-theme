@@ -337,13 +337,12 @@
 
   // Hide CC field if marked as hidden
   if (formSettings.cc_field && formSettings.cc_field.hidden) {
-      const labels = document.querySelectorAll('[data-garden-id="forms.field"] label');
-      const fieldElement = Array.from(labels).find(el => el.textContent.trim() === "CC") || null;
-      if (fieldElement) {
-        const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
-        if (parentElement) {
-          parentElement.style.display = "none"; // Hide the parent element
-        }
+    const labels = document.querySelectorAll('[data-garden-id="forms.field"] label');
+    const fieldElement = Array.from(labels).find(el => el.textContent.trim() === "CC") || null;
+    if (fieldElement) {
+      const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
+      if (parentElement) {
+        parentElement.style.display = "none"; // Hide the parent element
       }
     }
   }
