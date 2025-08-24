@@ -337,20 +337,13 @@
 
   // Hide CC field if marked as hidden
   if (formSettings.cc_field && formSettings.cc_field.hidden) {
-    if (field.name === "cc_field") {
-      // Special handling for CC field as it doesn't have a name attribute
-      try {
-        const labels = document.querySelectorAll('[data-garden-id="forms.field"] label');
-        fieldElement = Array.from(labels).find(el => el.textContent.trim() === "CC") || null;
-        if (fieldElement) {
-          const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
-          if (parentElement) {
-            parentElement.style.display = "none"; // Hide the parent element
-          }
+      const labels = document.querySelectorAll('[data-garden-id="forms.field"] label');
+      const fieldElement = Array.from(labels).find(el => el.textContent.trim() === "CC") || null;
+      if (fieldElement) {
+        const parentElement = fieldElement.closest('[data-garden-id="forms.field"]');
+        if (parentElement) {
+          parentElement.style.display = "none"; // Hide the parent element
         }
-      } catch (error) {
-        console.warn("Error finding CC field:", error);
-        fieldElement = null;
       }
     }
   }
