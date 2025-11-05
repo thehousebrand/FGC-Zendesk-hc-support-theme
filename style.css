@@ -6111,3 +6111,8 @@ svg[data-garden-id='dropdowns.combobox.input_icon'] {
   font-style: italic;
   padding: 0 15px;
 }
+
+/* Enable smooth scrolling behavior for knowledge base KEEP */
+html {
+  scroll-behavior: smooth;
+}
