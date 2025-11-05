@@ -773,6 +773,62 @@
     );
   }, 200);
 
+  // ============================================
+  // SMOOTH SCROLLING FUNCTIONALITY - NEW ADDITION
+  // ============================================
+  
+  function initSmoothScrolling() {
+    // Select all anchor links that start with #
+    const anchorLinks = document.querySelectorAll('a[href^="#"]:not([href="#"])');
+    
+    anchorLinks.forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        // Get the target element
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          e.preventDefault();
+          
+          // Calculate offset (adjust if you have a fixed header)
+          const headerOffset = 80; // Adjust this value based on your header height
+          const elementPosition = targetElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          
+          // Smooth scroll to target
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+          
+          // Update URL hash without jumping
+          if (history.pushState) {
+            history.pushState(null, null, targetId);
+          } else {
+            window.location.hash = targetId;
+          }
+        }
+      });
+    });
+    
+    // Handle direct navigation to anchored URLs (when page loads with hash)
+    if (window.location.hash) {
+      setTimeout(function() {
+        const targetElement = document.querySelector(window.location.hash);
+        if (targetElement) {
+          const headerOffset = 80; // Same offset as above
+          const elementPosition = targetElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 100); // Small delay to ensure page is fully loaded
+    }
+  }
+
   // One DOMContentLoaded to rule them all
   document.addEventListener("DOMContentLoaded", () => {
     // Reading time
