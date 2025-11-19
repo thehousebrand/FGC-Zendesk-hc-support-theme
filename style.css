@@ -299,11 +299,11 @@ h4 {
 
 @media (min-width: 1024px) {
     h1 {
-      line-height: 1.3;
+      line-height: 1.2;
     }
 
     h2 {
-      line-height: 1.3;
+      line-height: 1.2;
     }
 
     h3 {
@@ -482,10 +482,11 @@ ul {
 .button-large, .hbs-form input[type=submit] {
   cursor: pointer;
   background-color: $brand_color;
+  text-decoration:none;
   border: 0;
   border-radius: 4px;
   color: $brand_text_color;
-  font-size: 14px;
+  font-size: clamp(1rem, 4vw, 1.1rem);
   line-height: 2.72;
   min-width: 190px;
   padding: 0 1.9286em;
@@ -1488,7 +1489,6 @@ a.sign-in:hover{
 }
 
 .search-icon {
-  position: relative;
   top: 50%;
   transform: translateY(-50%);
   position: absolute;
@@ -1527,8 +1527,8 @@ a.sign-in:hover{
 .hero-team { background: linear-gradient(0deg, rgba(44, 43, 59, 0.00) 50%, rgba(44, 43, 59, 1) 100%), url($assets-marble-25-jpg) lightgray 50% / cover no-repeat; }
 
 .hero-inner {
-  /*position: relative;
-  top: 50%;
+  position: relative;
+  /*top: 50%;
   transform: translateY(-50%);*/
   width: 100%;
   max-width: 1160px;
@@ -1536,7 +1536,7 @@ a.sign-in:hover{
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-bottom:40px;
+  margin-bottom:40px;
 }
 
 .page-header {
@@ -1548,7 +1548,7 @@ a.sign-in:hover{
 }
 @media (min-width: 768px) {
   .page-header {
-    align-items: baseline;
+    align-items: flex-start;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 16px;
@@ -1630,7 +1630,7 @@ a.sign-in:hover{
 }
 @media (min-width: 768px) {
   .blocks-list {
-    margin: 0 -15px;
+    margin: 0 -4px;
   }
 }
 .blocks-item {
@@ -1647,11 +1647,12 @@ a.sign-in:hover{
   background: #FFEACB;
   border-radius: 4px;
   transition: outline-width 0.12s ease-in-out;
-  height:160px;
+  height:180px;
 }
 @media (min-width: 768px) {
   .blocks-item {
-    margin: 0 15px 30px;
+    margin: 0 4px 8px;
+    height:240px;
   }
 }
 .blocks-item:hover, .blocks-item:focus, .blocks-item:active {
@@ -1676,16 +1677,15 @@ a.sign-in:hover{
   color: $text_color;
 }
 .blocks-item-link {
-  color: $brand_color;
+  color: #000;
   padding: 16px 16px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  justify-content: center;
   border-radius: inherit;
   height: 100%;
-	justify-content: flex-end;
   text-decoration: none;
+  justify-content: space-between;
 }
 .blocks-item-link:visited, .blocks-item-link:hover, .blocks-item-link:active {
   color: inherit;
@@ -1743,17 +1743,19 @@ a.sign-in:hover{
 @media (min-width: 1024px) {
   .promoted-articles {
     flex-direction: row;
+    padding-bottom: 30px;
   }
 }
 .promoted-articles-item {
   flex: 1 0 auto;
+  margin-bottom:8px;
 }
 @media (min-width: 1024px) {
   .promoted-articles-item {
     align-self: flex-end;
     flex: 0 0 auto;
-    padding-right: 30px;
-    width: 33%; /* Three columns on desktop */
+    padding-right: 8px;
+    width: 50%; /* Three columns on desktop */
   }
   [dir=rtl] .promoted-articles-item {
     padding: 0 0 0 30px;
@@ -1763,9 +1765,21 @@ a.sign-in:hover{
   padding-right: 0;
 }
 .promoted-articles-item a {
-  display: block;
-  border-bottom: 1px solid #ddd;
-  padding: 15px 0;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  border-bottom: 0;
+  padding: 32px 16px;
+  border-radius: 4px;
+  background: #FFEACB;
+  font-size: 18px;
+  font-family: 'Recoleta';
+  font-weight: 600;
+  line-height: 20px;
+  text-decoration: none;
+}
+.promoted-articles-item a:hover {
+  text-decoration: underline;
 }
 .promoted-articles-item .icon-lock {
   vertical-align: baseline;
@@ -1775,7 +1789,7 @@ a.sign-in:hover{
 }
 @media (min-width: 1024px) {
   .promoted-articles-item:last-child a {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 0;
   }
 }
 
@@ -1804,34 +1818,53 @@ a.sign-in:hover{
 
 .community,
 .activity {
-  border-top: 1px solid #ddd;
+  /*border-top: 1px solid #ddd;*/
   padding: 30px 0;
 }
 
 /***** Recent activity *****/
 .recent-activity-header {
-  margin-bottom: 10px;
+  margin-bottom: 0px;
   text-align: center;
+  display: flex;
+  padding: 8px 0;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #000;
+  font-family: "Recoleta", serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 20px;
 }
 .recent-activity-list {
   padding: 0;
 }
 .recent-activity-item {
-  border-bottom: 1px solid #ddd;
+  /*border-bottom: 1px solid #ddd;
   overflow: auto;
-  padding: 20px 0;
+  padding: 20px 0;*/
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: #f6efe7;
 }
 .recent-activity-item h3 {
   margin: 0;
 }
 .recent-activity-item-parent {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
+  line-height: 20px;
 }
 .recent-activity-item-parent, .recent-activity-item-link {
   margin: 6px 0;
   display: inline-block;
   width: 100%;
+  text-decoration: none;
+}
+.recent-activity-item-parent:hover, .recent-activity-item-link:hover {
+  text-decoration: underline;
 }
 @media (min-width: 768px) {
   .recent-activity-item-parent, .recent-activity-item-link {
@@ -1882,7 +1915,8 @@ a.sign-in:hover{
   color: $visited_link_color;
 }
 .recent-activity-controls a:hover, .recent-activity-controls a:active, .recent-activity-controls a:focus {
-  color: $hover_link_color;
+  color: #000;
+  text-decoration: none;
 }
 .recent-activity-accessibility-label {
   border: 0;
@@ -2530,7 +2564,9 @@ a.sign-in:hover{
   position: relative;
 }
 .comment-wrapper.comment-official {
-  border: 1px solid $brand_color;
+  background-color: #F6EFE7;
+  border: 1px solid rgba(0, 0, 0, 0.20);
+  border-radius: 4px;
   padding: 40px 20px 20px;
 }
 @media (min-width: 768px) {
@@ -2756,9 +2792,21 @@ a.sign-in:hover{
 /* Used in article comments, post comments and post */
 .vote {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   text-align: center;
+  gap: 4px;
 }
+.post-actions-wrapper{
+  display: flex;
+  text-align: center;
+  background-color: #FFEACB;
+  flex-direction: row;
+  padding: 8px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-top: 24px;
+}
+
 .vote a:active, .vote a:hover, .vote a:focus {
   text-decoration: none;
 }
@@ -2767,6 +2815,9 @@ a.sign-in:hover{
   color: lighten($text_color, 20%);
   display: block;
   margin: 3px 0;
+  font-family: 'Recoleta';
+  font-size: 18px;
+  font-weight: 600;
 }
 [dir=rtl] .vote-sum {
   direction: ltr;
@@ -2774,7 +2825,7 @@ a.sign-in:hover{
 }
 
 .vote-up svg {
-  transform: scale(1, -1);
+  /*transform: scale(1, -1);*/
 }
 
 .vote-up:hover,
@@ -2827,8 +2878,9 @@ a.sign-in:hover{
 
 /***** Community *****/
 .community-hero {
-  background-image: url($community_background_image);
-  margin-bottom: 10px;
+  /*background-image: url($community_background_image);*/
+  background: linear-gradient(0deg, rgba(44, 43, 59, 0.00) 50%, rgba(44, 43, 59, 1) 100%), url(/hc/theming_assets/01K2BNZ3EZV780071ACKAENJ09) lightgray 50% / cover no-repeat;
+  margin-bottom: 32px;
 }
 .community-footer {
   padding-top: 50px;
@@ -2839,8 +2891,15 @@ a.sign-in:hover{
   margin-bottom: 20px;
 }
 .community-featured-posts .title {
-  font-size: 18px;
+  /*font-size: 18px;
+  font-weight: 600;*/
+  color: #000;
+  font-family: "Recoleta", serif;
+  font-size: clamp(1.4rem, 4vw, 1.5rem);
   font-weight: 600;
+  line-height: 27px;
+  margin-block-end: 0;
+  margin-bottom:30px;
 }
 .community-featured-posts, .community-activity {
   padding-top: 40px;
@@ -2850,8 +2909,14 @@ a.sign-in:hover{
   margin-bottom: 30px;
 }
 .community-header .title {
-  margin-bottom: 0;
-  font-size: 16px;
+  /*margin-bottom: 0;
+  font-size: 16px;*/
+  color: #000;
+  font-family: "Recoleta", serif;
+  font-size: clamp(1.4rem, 4vw, 1.5rem);
+  font-weight: 600;
+  line-height: 27px;
+  margin-block-end: 0;
 }
 
 .post-to-community {
@@ -2870,13 +2935,17 @@ a.sign-in:hover{
 }
 .topics-item .meta-group {
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 8px;
 }
 
 /* Community topic page */
 .topic-header {
-  border-bottom: 1px solid #ddd;
   font-size: 13px;
+  display: flex;
+  padding: 8px 0;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #000;
 }
 @media (min-width: 768px) {
   .topic-header {
@@ -2973,12 +3042,17 @@ a.sign-in:hover{
   padding: 0;
 }
 .striped-list-item {
-  align-items: flex-start;
+  /*align-items: flex-start;
   border-bottom: 1px solid #ddd;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 20px 0;
+  padding: 20px 0;*/
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: #f6efe7;
 }
 @media (min-width: 768px) {
   .striped-list-item {
@@ -2993,15 +3067,20 @@ a.sign-in:hover{
   color: $link_color;
   margin-bottom: 10px;
   margin-right: 5px;
+  font-family: "Recoleta", serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 20px;
+  text-decoration: none;
 }
-.striped-list-title:hover, .striped-list-title:focus, .striped-list-title:active {
+.striped-list-title:hover, .striped-list-title:focus {
   text-decoration: underline;
 }
 .striped-list-title:visited {
   color: $visited_link_color;
 }
 .striped-list .meta-group {
-  margin: 5px 0;
+  margin: 5px 0 0 0;
 }
 .striped-list-count {
   color: lighten($text_color, 20%);
@@ -3031,6 +3110,12 @@ a.sign-in:hover{
 }
 .striped-list-number {
   text-align: center;
+  color: #000;
+  font-family: "Recoleta", serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 20px;
+  margin-block-end: 0;
 }
 @media (min-width: 768px) {
   .striped-list-number {
@@ -3042,22 +3127,25 @@ a.sign-in:hover{
 /***** Status labels *****/
 /* Styles labels used in posts, articles and requests */
 .status-label {
-  background-color: #589184;
+  background-color: #BD96CE;
   border-radius: 4px;
-  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.20);
+  color: #000;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   margin-right: 2px;
-  padding: 3px 10px;
-  vertical-align: middle;
+  padding: 2px 4px 2px 2px;
+  align-items: center;
   white-space: nowrap;
-  display: inline-block;
+  display: inline-flex;
+  justify-content: flex-start;
+  gap: 2px;
 }
 .status-label:hover, .status-label:active, .status-label:focus {
   text-decoration: none;
 }
 .status-label-pinned, .status-label-featured, .status-label-official {
-  background-color: $brand_color;
+  background-color: #FFEACB;
 }
 .status-label-official {
   border-radius: 0;
@@ -3067,12 +3155,23 @@ a.sign-in:hover{
   text-align: center;
   top: 0;
   width: 100%;
+  border-radius: 4px 4px 0 0;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.20);
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
 }
 @media (min-width: 768px) {
   .status-label-official {
     border-radius: 0 0 4px 4px;
     right: 30px;
     width: auto;
+    margin-top: -1px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.20);
+  border-top: 1px solid rgba(0, 0, 0, 0.20);
+  border-right: 1px solid rgba(0, 0, 0, 0.20);
+  border-left: 1px solid rgba(0, 0, 0, 0.20);
   }
 }
 [dir=rtl] .status-label-official {
@@ -3142,7 +3241,7 @@ a.sign-in:hover{
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 @media (min-width: 768px) {
   .post-header {
@@ -3164,8 +3263,9 @@ a.sign-in:hover{
   }
 }
 .post-title h1 {
-  display: inline;
+  display: block;
   vertical-align: middle;
+  margin-bottom: 8px;
 }
 @media (min-width: 768px) {
   .post-title h1 {
@@ -3173,12 +3273,12 @@ a.sign-in:hover{
   }
 }
 .post-author {
-  align-items: flex-start;
+  align-items: center;
   display: flex;
   justify-content: space-between;
+  margin-bottom: 30px;
 }
 .post-avatar {
-  margin-bottom: 30px;
 }
 .post-content {
   font-family: $text_font;
@@ -3188,6 +3288,7 @@ a.sign-in:hover{
 .post-info-container {
   display: flex;
   margin-bottom: 40px;
+  flex-direction: column;
 }
 .post-info {
   min-width: 0;
@@ -3342,6 +3443,12 @@ a.sign-in:hover{
   padding: 30px 0;
   text-align: center;
 }
+.post-sidebar-inner{
+  	padding: 16px;
+    background-color: #f6efe7;
+    border-radius: 4px;
+}
+
 @media (min-width: 1024px) {
   .post-sidebar {
     border: 0;
@@ -4127,7 +4234,7 @@ a.sign-in:hover{
 }
 
 .meta-group-opposite {
-  float: right;
+  /*float: right;*/
 }
 
 [dir=rtl] .meta-group-opposite {
@@ -5132,6 +5239,7 @@ html[dir=rtl] .notification-left-aligned {
 .dropdown {
   position: relative;
   display: inline-block;
+  margin: auto 0;
 }
 
 .dropdown-toggle {
