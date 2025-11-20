@@ -1364,3 +1364,96 @@ document.addEventListener('DOMContentLoaded', function() {
   
   console.log('Persistent swap monitoring active');
 })();
+
+// Efficient implementation using the count field - count posts in topics
+async function fetchTopCommunityTopics(limit = 3) {
+  try {
+    const csrfToken = await getCSRFTokenWithCache();
+    
+    // Step 1: Get all topics
+    const topicsUrl = `/api/v2/community/topics.json`;
+    const topicsResponse = await fetch(topicsUrl, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(csrfToken && { "X-CSRF-Token": csrfToken })
+      }
+    });
+    
+    if (!topicsResponse.ok) {
+      console.warn("Topics API not available, might be wrong brand");
+      return [];
+    }
+    
+    const topicsData = await topicsResponse.json();
+    
+    // Step 2: Get count for each topic efficiently
+    const topicsWithCounts = await Promise.all(
+      topicsData.topics.map(async (topic) => {
+        try {
+          // This URL pattern works and returns count!
+          const countUrl = `/api/v2/community/posts.json?topic_id=${topic.id}&per_page=1`;
+          const response = await fetch(countUrl, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(csrfToken && { "X-CSRF-Token": csrfToken })
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            // We have the count field!
+            return {
+              id: topic.id,
+              name: topic.name,
+              url: topic.html_url,
+              count: data.count || 0
+            };
+          }
+        } catch (err) {
+          console.warn(`Failed to get count for topic ${topic.id}:`, err);
+        }
+        return null;
+      })
+    );
+    
+    // Filter, sort and return top topics
+    return topicsWithCounts
+      .filter(topic => topic && topic.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+    
+  } catch (error) {
+    console.error("Error fetching community topics:", error);
+    return [];
+  }
+}
+
+// Display function remains the same
+function displayTopCommunityTopics(containerId, topics) {
+  const container = document.querySelector(`#${containerId}`);
+  if (!container) {
+    console.error(`Container with ID "${containerId}" not found.`);
+    return;
+  }
+  
+  container.innerHTML = "";
+  if (!topics || !topics.length) {
+    container.innerHTML = "No active community topics found.";
+    return;
+  }
+  
+  const frag = document.createDocumentFragment();
+  topics.forEach((topic, index) => {
+    const link = document.createElement("a");
+    link.href = topic.url;
+    link.textContent = `${topic.name} (${topic.count} ${topic.count === 1 ? 'post' : 'posts'})`;
+    link.className = "popular-topic-link";
+    frag.appendChild(link);
+    
+    if (index < topics.length - 1) {
+      frag.appendChild(document.createTextNode(", "));
+    }
+  });
+  
+  container.appendChild(frag);
+}
