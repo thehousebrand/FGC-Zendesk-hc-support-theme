@@ -1237,7 +1237,6 @@
         }
       }
     })();
-  });
 
   // Community Topics with Post Counts - for Community landing pages
   
@@ -1361,6 +1360,7 @@
     }
   });
 
+});
 })(); // This closes the main IIFE - MAKE SURE THIS STAYS AT THE END
 
 document.addEventListener('DOMContentLoaded', function() {
