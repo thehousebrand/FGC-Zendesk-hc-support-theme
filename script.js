@@ -1283,64 +1283,84 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Custom Recent Activity Implementation - Reusing existing CSS classes
-// Recent Activity Order Swap - Final Version
+// Recent Activity Order Swap - Persistent Version
 (function() {
   console.log('Recent activity swap script initialized');
+  
+  let hasSwapped = {};  // Track which items we've already swapped
   
   // Function to swap the order
   function swapRecentActivityOrder() {
     const items = document.querySelectorAll('.recent-activity-item');
     
     if (items.length === 0) {
-      console.log('No items found yet');
       return false;
     }
     
-    console.log('Found ' + items.length + ' items, swapping...');
+    let swappedCount = 0;
     
     items.forEach((item, index) => {
-      // Find the elements
+      // Create a unique identifier for this item
+      const itemText = item.textContent.trim();
+      const itemId = itemText.substring(0, 50); // Use first 50 chars as ID
+      
+      // Skip if we've already swapped this exact item
+      if (hasSwapped[itemId]) {
+        return;
+      }
+      
       const parentDiv = item.querySelector('.recent-activity-item-parent');
       const linkDiv = item.querySelector('.recent-activity-item-link');
       
       if (parentDiv && linkDiv) {
-        // Swap the innerHTML
-        const tempHTML = parentDiv.innerHTML;
-        parentDiv.innerHTML = linkDiv.innerHTML;
-        linkDiv.innerHTML = tempHTML;
-        console.log('Swapped item ' + (index + 1));
+        // Check if it needs swapping (topic should not be first)
+        const parentText = parentDiv.textContent.trim();
+        
+        // Only swap if the parent contains "Noticeboard", "General Discussion", etc. (topics)
+        if (parentText === 'Noticeboard' || 
+            parentText === 'General Discussion' || 
+            parentText === 'Feature Requests' || 
+            parentText === 'Feedback') {
+          
+          const tempHTML = parentDiv.innerHTML;
+          parentDiv.innerHTML = linkDiv.innerHTML;
+          linkDiv.innerHTML = tempHTML;
+          
+          hasSwapped[itemId] = true;
+          swappedCount++;
+          console.log('Swapped item: ' + itemId.substring(0, 30) + '...');
+        }
       }
     });
+    
+    if (swappedCount > 0) {
+      console.log('Swapped ' + swappedCount + ' items');
+    }
     
     return true;
   }
   
-  // Watch for changes in the recent activity container
+  // Run continuously to catch any re-renders
+  function maintainSwap() {
+    swapRecentActivityOrder();
+  }
+  
+  // Watch for changes and reapply swap
   const observer = new MutationObserver(function(mutations) {
-    // Check if recent activity items exist
-    if (document.querySelector('.recent-activity-item')) {
-      console.log('Recent activity loaded, swapping...');
-      if (swapRecentActivityOrder()) {
-        observer.disconnect(); // Stop watching once we've swapped
-      }
-    }
+    maintainSwap();
   });
   
-  // Start observing the entire body for changes
+  // Start observing
   observer.observe(document.body, {
     childList: true,
     subtree: true
   });
   
-  // Also try multiple times in case content is already loaded
-  let attempts = 0;
-  const trySwap = setInterval(function() {
-    attempts++;
-    console.log('Attempt ' + attempts + ' to find and swap items');
-    
-    if (swapRecentActivityOrder() || attempts > 10) {
-      clearInterval(trySwap);
-      console.log('Stopped trying after ' + attempts + ' attempts');
-    }
-  }, 1000); // Try every second for up to 10 seconds
+  // Also run periodically to catch any missed updates
+  setInterval(maintainSwap, 500); // Check every 500ms
+  
+  // Initial attempt
+  setTimeout(maintainSwap, 1000);
+  
+  console.log('Persistent swap monitoring active');
 })();
