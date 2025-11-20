@@ -1199,24 +1199,6 @@
           } catch (error) {
             console.log("⚠️ Top tags not available:", error);
           }
-
-          // Check if we're on a community page and load topics
-          if (window.location.pathname.includes('/community')) {
-            console.log("📊 Community page detected, fetching top topics...");
-            
-            try {
-              const communityTopics = await fetchTopCommunityTopics(3);
-              
-              if (communityTopics && communityTopics.length > 0) {
-                console.log("✅ Top community topics found:", communityTopics);
-                displayTopCommunityTopics("top-community-topics", communityTopics);
-              } else {
-                console.log("⚠️ No community topics with posts found");
-              }
-            } catch (error) {
-              console.error("❌ Error loading community topics:", error);
-            }
-          }
           
         } else {
           // SUPPORT BRAND: Load FAQ sections
@@ -1255,100 +1237,6 @@
         }
       }
     })();
-
-  // Community Topics with Post Counts - for Community landing pages
-  
-  // Fetch top community topics with accurate post counts
-  async function fetchTopCommunityTopics(limit = 3) {
-    try {
-      const csrfToken = await getCSRFTokenWithCache();
-      
-      // Get all topics first
-      const topicsUrl = `/api/v2/community/topics.json`;
-      const topicsResponse = await fetch(topicsUrl, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(csrfToken && { "X-CSRF-Token": csrfToken })
-        }
-      });
-      
-      if (!topicsResponse.ok) {
-        console.warn("Community topics not available");
-        return [];
-      }
-      
-      const topicsData = await topicsResponse.json();
-      
-      // Get accurate count for each topic (parallel for speed)
-      const topicsWithCounts = await Promise.all(
-        topicsData.topics.map(async (topic) => {
-          try {
-            // This gives us accurate total count with minimal data transfer
-            const countUrl = `/api/v2/community/posts.json?topic_id=${topic.id}&per_page=1`;
-            const response = await fetch(countUrl, {
-              headers: {
-                "Content-Type": "application/json",
-                ...(csrfToken && { "X-CSRF-Token": csrfToken })
-              }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              return {
-                id: topic.id,
-                name: topic.name,
-                url: topic.html_url,
-                count: data.count || 0  // This is the ACCURATE total
-              };
-            }
-          } catch (err) {
-            console.warn(`Failed to get count for topic ${topic.id}:`, err);
-          }
-          return { ...topic, count: 0 };
-        })
-      );
-      
-      // Sort by post count and return top N
-      return topicsWithCounts
-        .filter(topic => topic.count > 0)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, limit);
-      
-    } catch (error) {
-      console.error("Error fetching community topics:", error);
-      return [];
-    }
-  }
-  
-  // Display function for community topics
-  function displayTopCommunityTopics(containerId, topics) {
-    const container = document.querySelector(`#${containerId}`);
-    if (!container) {
-      console.error(`Container with ID "${containerId}" not found.`);
-      return;
-    }
-    
-    container.innerHTML = "";
-    if (!topics || !topics.length) {
-      // Don't show anything if no topics
-      return;
-    }
-    
-    const frag = document.createDocumentFragment();
-    topics.forEach((topic, index) => {
-      const link = document.createElement("a");
-      link.href = topic.url;
-      link.textContent = `${topic.name} (${topic.count})`;
-      link.className = "popular-topic-link";
-      frag.appendChild(link);
-      
-      if (index < topics.length - 1) {
-        frag.appendChild(document.createTextNode(", "));
-      }
-    });
-    
-    container.appendChild(frag);
-  }
 });
 })(); // This closes the main IIFE - MAKE SURE THIS STAYS AT THE END
 
