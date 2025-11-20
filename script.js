@@ -1302,91 +1302,65 @@ document.addEventListener('DOMContentLoaded', function() {
   recentActivityContainer.parentNode.insertBefore(customActivityContainer, recentActivityContainer);
   
   // Fetch and render the recent activity
-  async function loadCustomRecentActivity() {
-    try {
-      const helpCenterUrl = window.location.origin + '/api/v2/help_center';
-      const locale = document.documentElement.lang || 'en-au';
-      
-      // Fetch recent posts
-      const postsResponse = await fetch(`${helpCenterUrl}/${locale}/community/posts.json?sort_by=updated_at&sort_order=desc&per_page=10`);
-      const postsData = await postsResponse.json();
-      
-      // Build HTML with existing CSS classes
-      let customHTML = `
-        <h2 class="recent-activity-header">Recent activity (Community)</h2>
-        <ul class="recent-activity-list">
-      `;
-      
-      // Track unique posts to avoid duplicates
-      const displayedPosts = new Set();
-      let itemCount = 0;
-      
-      for (const post of postsData.posts) {
-        if (itemCount >= 5) break; // Show only 5 items like the original
-        
-        if (!displayedPosts.has(post.id)) {
-          displayedPosts.add(post.id);
-          
-          // Get topic information
-          const topicResponse = await fetch(`${helpCenterUrl}/${locale}/community/topics/${post.topic_id}.json`);
-          const topicData = await topicResponse.json();
-          
-          // Format the date/time
-          const updatedDate = new Date(post.updated_at);
-          const timeAgo = getRelativeTime(updatedDate);
-          
-          // Get the action text
-          const actionText = post.comment_count > 0 ? 'Comment added' : 'Post created';
-          
-          // Using your existing CSS classes - just swapping the order
-          customHTML += `
-            <li class="recent-activity-item">
-              <div class="recent-activity-item-parent">
-                <a href="${post.html_url}">${post.title}</a>
-              </div>
-              <div class="recent-activity-item-link">
-                <a href="${topicData.topic.html_url}">${topicData.topic.name}</a>
-              </div>
-              <div class="recent-activity-item-meta">${actionText} ${timeAgo}</div>
-            </li>
-          `;
-          
-          itemCount++;
-        }
+  // Custom Recent Activity Implementation with debugging
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Starting custom recent activity script...');
+  
+  // Use MutationObserver to watch for the recent activity to load
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      // Check if recent activity items have been added
+      const recentActivityItems = document.querySelectorAll('.recent-activity-item');
+      if (recentActivityItems.length > 0) {
+        console.log('Found recent activity items:', recentActivityItems.length);
+        observer.disconnect(); // Stop observing
+        swapRecentActivityOrder();
       }
-      
-      customHTML += `
-        </ul>
-        <div class="recent-activity-controls">
-          <a href="/hc/en-au/community/posts">See more</a>
-        </div>
-      `;
-      
-      customActivityContainer.innerHTML = customHTML;
-      
-    } catch (error) {
-      console.error('Error loading recent activity via API:', error);
-      // If custom loading fails, show the original
-      recentActivityContainer.style.display = '';
-      customActivityContainer.remove();
-    }
+    });
+  });
+  
+  // Start observing the container where recent activity will load
+  const targetNode = document.querySelector('.community-activity');
+  if (targetNode) {
+    console.log('Observing community-activity container...');
+    observer.observe(targetNode, { childList: true, subtree: true });
+  } else {
+    console.log('Community activity container not found');
   }
   
-  // Helper function to calculate relative time
-  function getRelativeTime(date) {
-    const now = new Date();
-    const diff = now - date;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+  // Function to swap the order of elements
+  function swapRecentActivityOrder() {
+    const items = document.querySelectorAll('.recent-activity-item');
+    console.log('Swapping order for', items.length, 'items');
     
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    return 'Just now';
+    items.forEach(item => {
+      const parent = item.querySelector('.recent-activity-item-parent');
+      const link = item.querySelector('.recent-activity-item-link');
+      
+      if (parent && link) {
+        // Clone the elements to preserve event handlers
+        const parentClone = parent.cloneNode(true);
+        const linkClone = link.cloneNode(true);
+        
+        // Swap the classes to swap the styles
+        parentClone.className = 'recent-activity-item-link';
+        linkClone.className = 'recent-activity-item-parent';
+        
+        // Replace the originals
+        parent.replaceWith(linkClone);
+        link.replaceWith(parentClone);
+        
+        console.log('Swapped item');
+      }
+    });
   }
   
-  // Load the custom recent activity
-  loadCustomRecentActivity();
+  // Also try to run immediately in case content is already loaded
+  setTimeout(function() {
+    const existingItems = document.querySelectorAll('.recent-activity-item');
+    if (existingItems.length > 0) {
+      console.log('Found existing items on delayed check');
+      swapRecentActivityOrder();
+    }
+  }, 1000);
 });
