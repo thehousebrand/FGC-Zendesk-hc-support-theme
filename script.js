@@ -1281,3 +1281,112 @@ document.addEventListener('DOMContentLoaded', function() {
     featuredList.replaceWith(emptyMessage);
   }
 });
+
+// Custom Recent Activity Implementation - Reusing existing CSS classes
+document.addEventListener('DOMContentLoaded', function() {
+  
+  // Find the recent activity container
+  const recentActivityContainer = document.querySelector('[data-app="recent-activity"]');
+  if (!recentActivityContainer) return;
+  
+  // Get the data URL
+  const dataUrl = recentActivityContainer.getAttribute('data-url');
+  if (!dataUrl) return;
+  
+  // Hide the default recent activity while we load our custom one
+  recentActivityContainer.style.display = 'none';
+  
+  // Create our custom container with existing classes
+  const customActivityContainer = document.createElement('div');
+  customActivityContainer.className = 'recent-activity';
+  recentActivityContainer.parentNode.insertBefore(customActivityContainer, recentActivityContainer);
+  
+  // Fetch and render the recent activity
+  async function loadCustomRecentActivity() {
+    try {
+      const helpCenterUrl = window.location.origin + '/api/v2/help_center';
+      const locale = document.documentElement.lang || 'en-au';
+      
+      // Fetch recent posts
+      const postsResponse = await fetch(`${helpCenterUrl}/${locale}/community/posts.json?sort_by=updated_at&sort_order=desc&per_page=10`);
+      const postsData = await postsResponse.json();
+      
+      // Build HTML with existing CSS classes
+      let customHTML = `
+        <h2 class="recent-activity-header">Recent activity (Community)</h2>
+        <ul class="recent-activity-list">
+      `;
+      
+      // Track unique posts to avoid duplicates
+      const displayedPosts = new Set();
+      let itemCount = 0;
+      
+      for (const post of postsData.posts) {
+        if (itemCount >= 5) break; // Show only 5 items like the original
+        
+        if (!displayedPosts.has(post.id)) {
+          displayedPosts.add(post.id);
+          
+          // Get topic information
+          const topicResponse = await fetch(`${helpCenterUrl}/${locale}/community/topics/${post.topic_id}.json`);
+          const topicData = await topicResponse.json();
+          
+          // Format the date/time
+          const updatedDate = new Date(post.updated_at);
+          const timeAgo = getRelativeTime(updatedDate);
+          
+          // Get the action text
+          const actionText = post.comment_count > 0 ? 'Comment added' : 'Post created';
+          
+          // Using your existing CSS classes - just swapping the order
+          customHTML += `
+            <li class="recent-activity-item">
+              <div class="recent-activity-item-parent">
+                <a href="${post.html_url}">${post.title}</a>
+              </div>
+              <div class="recent-activity-item-link">
+                <a href="${topicData.topic.html_url}">${topicData.topic.name}</a>
+              </div>
+              <div class="recent-activity-item-meta">${actionText} ${timeAgo}</div>
+            </li>
+          `;
+          
+          itemCount++;
+        }
+      }
+      
+      customHTML += `
+        </ul>
+        <div class="recent-activity-controls">
+          <a href="/hc/en-au/community/posts">See more</a>
+        </div>
+      `;
+      
+      customActivityContainer.innerHTML = customHTML;
+      
+    } catch (error) {
+      console.error('Error loading recent activity via API:', error);
+      // If custom loading fails, show the original
+      recentActivityContainer.style.display = '';
+      customActivityContainer.remove();
+    }
+  }
+  
+  // Helper function to calculate relative time
+  function getRelativeTime(date) {
+    const now = new Date();
+    const diff = now - date;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return 'Just now';
+  }
+  
+  // Load the custom recent activity
+  loadCustomRecentActivity();
+});
