@@ -6224,26 +6224,3 @@ svg[data-garden-id='dropdowns.combobox.input_icon'] {
 html {
   scroll-behavior: smooth;
 }
-
-/* Added control of featured post link */
-.community-admin-actions {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #e5e5e5;
-}
-
-.feature-post-link {
-  color: #666;
-  font-size: 14px;
-  text-decoration: none;
-}
-
-.feature-post-link:hover {
-  text-decoration: underline;
-}
-
-.no-featured-posts {
-  color: #999;
-  font-style: italic;
-  margin: 10px 0;
-}
