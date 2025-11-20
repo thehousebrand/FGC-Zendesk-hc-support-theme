@@ -1283,84 +1283,64 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Custom Recent Activity Implementation - Reusing existing CSS classes
-document.addEventListener('DOMContentLoaded', function() {
+// Recent Activity Order Swap - Final Version
+(function() {
+  console.log('Recent activity swap script initialized');
   
-  // Find the recent activity container
-  const recentActivityContainer = document.querySelector('[data-app="recent-activity"]');
-  if (!recentActivityContainer) return;
-  
-  // Get the data URL
-  const dataUrl = recentActivityContainer.getAttribute('data-url');
-  if (!dataUrl) return;
-  
-  // Hide the default recent activity while we load our custom one
-  recentActivityContainer.style.display = 'none';
-  
-  // Create our custom container with existing classes
-  const customActivityContainer = document.createElement('div');
-  customActivityContainer.className = 'recent-activity';
-  recentActivityContainer.parentNode.insertBefore(customActivityContainer, recentActivityContainer);
-  
-  // Fetch and render the recent activity
-  // Custom Recent Activity Implementation with debugging
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('Starting custom recent activity script...');
-  
-  // Use MutationObserver to watch for the recent activity to load
-  const observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-      // Check if recent activity items have been added
-      const recentActivityItems = document.querySelectorAll('.recent-activity-item');
-      if (recentActivityItems.length > 0) {
-        console.log('Found recent activity items:', recentActivityItems.length);
-        observer.disconnect(); // Stop observing
-        swapRecentActivityOrder();
-      }
-    });
-  });
-  
-  // Start observing the container where recent activity will load
-  const targetNode = document.querySelector('.community-activity');
-  if (targetNode) {
-    console.log('Observing community-activity container...');
-    observer.observe(targetNode, { childList: true, subtree: true });
-  } else {
-    console.log('Community activity container not found');
-  }
-  
-  // Function to swap the order of elements
+  // Function to swap the order
   function swapRecentActivityOrder() {
     const items = document.querySelectorAll('.recent-activity-item');
-    console.log('Swapping order for', items.length, 'items');
     
-    items.forEach(item => {
-      const parent = item.querySelector('.recent-activity-item-parent');
-      const link = item.querySelector('.recent-activity-item-link');
+    if (items.length === 0) {
+      console.log('No items found yet');
+      return false;
+    }
+    
+    console.log('Found ' + items.length + ' items, swapping...');
+    
+    items.forEach((item, index) => {
+      // Find the elements
+      const parentDiv = item.querySelector('.recent-activity-item-parent');
+      const linkDiv = item.querySelector('.recent-activity-item-link');
       
-      if (parent && link) {
-        // Clone the elements to preserve event handlers
-        const parentClone = parent.cloneNode(true);
-        const linkClone = link.cloneNode(true);
-        
-        // Swap the classes to swap the styles
-        parentClone.className = 'recent-activity-item-link';
-        linkClone.className = 'recent-activity-item-parent';
-        
-        // Replace the originals
-        parent.replaceWith(linkClone);
-        link.replaceWith(parentClone);
-        
-        console.log('Swapped item');
+      if (parentDiv && linkDiv) {
+        // Swap the innerHTML
+        const tempHTML = parentDiv.innerHTML;
+        parentDiv.innerHTML = linkDiv.innerHTML;
+        linkDiv.innerHTML = tempHTML;
+        console.log('Swapped item ' + (index + 1));
       }
     });
+    
+    return true;
   }
   
-  // Also try to run immediately in case content is already loaded
-  setTimeout(function() {
-    const existingItems = document.querySelectorAll('.recent-activity-item');
-    if (existingItems.length > 0) {
-      console.log('Found existing items on delayed check');
-      swapRecentActivityOrder();
+  // Watch for changes in the recent activity container
+  const observer = new MutationObserver(function(mutations) {
+    // Check if recent activity items exist
+    if (document.querySelector('.recent-activity-item')) {
+      console.log('Recent activity loaded, swapping...');
+      if (swapRecentActivityOrder()) {
+        observer.disconnect(); // Stop watching once we've swapped
+      }
     }
-  }, 1000);
-});
+  });
+  
+  // Start observing the entire body for changes
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  
+  // Also try multiple times in case content is already loaded
+  let attempts = 0;
+  const trySwap = setInterval(function() {
+    attempts++;
+    console.log('Attempt ' + attempts + ' to find and swap items');
+    
+    if (swapRecentActivityOrder() || attempts > 10) {
+      clearInterval(trySwap);
+      console.log('Stopped trying after ' + attempts + ' attempts');
+    }
+  }, 1000); // Try every second for up to 10 seconds
+})();
