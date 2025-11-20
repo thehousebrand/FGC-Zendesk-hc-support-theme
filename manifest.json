@@ -1,7 +1,7 @@
 {
   "name": "FGC support",
   "author": "FGC",
-  "version": "4.3.100",
+  "version": "4.4.1",
   "api_version": 4,
   "default_locale": "en-us",
   "settings": [
