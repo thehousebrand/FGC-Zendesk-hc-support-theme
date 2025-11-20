@@ -1365,12 +1365,14 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('Persistent swap monitoring active');
 })();
 
-// Efficient implementation using the count field - count posts in topics
+// Community Topics with Post Counts - for Community landing pages
+
+// Fetch top community topics with accurate post counts
 async function fetchTopCommunityTopics(limit = 3) {
   try {
     const csrfToken = await getCSRFTokenWithCache();
     
-    // Step 1: Get all topics
+    // Get all topics first
     const topicsUrl = `/api/v2/community/topics.json`;
     const topicsResponse = await fetch(topicsUrl, {
       headers: {
@@ -1380,17 +1382,17 @@ async function fetchTopCommunityTopics(limit = 3) {
     });
     
     if (!topicsResponse.ok) {
-      console.warn("Topics API not available, might be wrong brand");
+      console.warn("Community topics not available");
       return [];
     }
     
     const topicsData = await topicsResponse.json();
     
-    // Step 2: Get count for each topic efficiently
+    // Get accurate count for each topic (parallel for speed)
     const topicsWithCounts = await Promise.all(
       topicsData.topics.map(async (topic) => {
         try {
-          // This URL pattern works and returns count!
+          // This gives us accurate total count with minimal data transfer
           const countUrl = `/api/v2/community/posts.json?topic_id=${topic.id}&per_page=1`;
           const response = await fetch(countUrl, {
             headers: {
@@ -1401,24 +1403,23 @@ async function fetchTopCommunityTopics(limit = 3) {
           
           if (response.ok) {
             const data = await response.json();
-            // We have the count field!
             return {
               id: topic.id,
               name: topic.name,
               url: topic.html_url,
-              count: data.count || 0
+              count: data.count || 0  // This is the ACCURATE total
             };
           }
         } catch (err) {
           console.warn(`Failed to get count for topic ${topic.id}:`, err);
         }
-        return null;
+        return { ...topic, count: 0 };
       })
     );
     
-    // Filter, sort and return top topics
+    // Sort by post count and return top N
     return topicsWithCounts
-      .filter(topic => topic && topic.count > 0)
+      .filter(topic => topic.count > 0)
       .sort((a, b) => b.count - a.count)
       .slice(0, limit);
     
@@ -1428,7 +1429,7 @@ async function fetchTopCommunityTopics(limit = 3) {
   }
 }
 
-// Display function remains the same
+// Display function for community topics
 function displayTopCommunityTopics(containerId, topics) {
   const container = document.querySelector(`#${containerId}`);
   if (!container) {
@@ -1438,7 +1439,7 @@ function displayTopCommunityTopics(containerId, topics) {
   
   container.innerHTML = "";
   if (!topics || !topics.length) {
-    container.innerHTML = "No active community topics found.";
+    // Don't show anything if no topics
     return;
   }
   
@@ -1446,7 +1447,7 @@ function displayTopCommunityTopics(containerId, topics) {
   topics.forEach((topic, index) => {
     const link = document.createElement("a");
     link.href = topic.url;
-    link.textContent = `${topic.name} (${topic.count} ${topic.count === 1 ? 'post' : 'posts'})`;
+    link.textContent = `${topic.name} (${topic.count})`;
     link.className = "popular-topic-link";
     frag.appendChild(link);
     
@@ -1457,3 +1458,17 @@ function displayTopCommunityTopics(containerId, topics) {
   
   container.appendChild(frag);
 }
+
+// Initialize on community pages
+document.addEventListener('DOMContentLoaded', async function() {
+  // Only run on community pages
+  if (window.location.pathname.includes('/community')) {
+    const communityTopics = await fetchTopCommunityTopics(3);
+    if (communityTopics && communityTopics.length > 0) {
+      console.log("✅ Top community topics:", communityTopics);
+      
+      // Display in element with id="top-community-topics"
+      displayTopCommunityTopics("top-community-topics", communityTopics);
+    }
+  }
+});
