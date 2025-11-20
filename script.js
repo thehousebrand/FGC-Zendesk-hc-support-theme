@@ -1461,14 +1461,28 @@ function displayTopCommunityTopics(containerId, topics) {
 
 // Initialize on community pages
 document.addEventListener('DOMContentLoaded', async function() {
-  // Only run on community pages
-  if (window.location.pathname.includes('/community')) {
-    const communityTopics = await fetchTopCommunityTopics(3);
-    if (communityTopics && communityTopics.length > 0) {
-      console.log("✅ Top community topics:", communityTopics);
+  // Check if we're on a community page - be more flexible with the path check
+  const isCommPage = window.location.pathname.includes('/community') || 
+                      window.location.pathname.includes('/posts') ||
+                      window.location.pathname.includes('/topics');
+                      
+  // Also check if the element exists on the page (more reliable)
+  const topicsContainer = document.getElementById('top-community-topics');
+  
+  if (isCommPage || topicsContainer) {
+    console.log("📊 Community page detected, fetching top topics...");
+    
+    try {
+      const communityTopics = await fetchTopCommunityTopics(3);
       
-      // Display in element with id="top-community-topics"
-      displayTopCommunityTopics("top-community-topics", communityTopics);
+      if (communityTopics && communityTopics.length > 0) {
+        console.log("✅ Top community topics found:", communityTopics);
+        displayTopCommunityTopics("top-community-topics", communityTopics);
+      } else {
+        console.log("⚠️ No community topics with posts found");
+      }
+    } catch (error) {
+      console.error("❌ Error loading community topics:", error);
     }
   }
 });
