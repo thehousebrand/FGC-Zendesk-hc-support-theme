@@ -1299,7 +1299,9 @@ function setCommunityTopicIcons() {
       }
     })();  // This self-invokes the bootContent function
 
-  }); // This closes the main DOMContentLoaded event listener from line 863 This closes the main IIFE - MAKE SURE THIS STAYS AT THE END
+  }); // This closes the main DOMContentLoaded event listener from line 863 
+
+})(); // This closes the main IIFE - MAKE SURE THIS STAYS AT THE END
 
 document.addEventListener('DOMContentLoaded', function() {
   // Target the featured posts section specifically
