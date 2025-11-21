@@ -1208,35 +1208,28 @@ function setCommunityTopicIcons() {
     // COMMUNITY TOPIC ICONS INITIALIZATION - TEAM BRAND ONLY 
     // ============================================
     
-    // BRAND-SPECIFIC INITIALIZATION
-    // ============================================
-    // INITIALIZATION ON DOM READY
-    // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
-      const brand = detectBrand();
-      
-      if (brand === 'team') {
-        // Only run on team brand and if we're on a community topics page
-        if (document.querySelector('.topics-list')) {
-          setCommunityTopicIcons();
-          
-          // Watch for dynamically loaded community topics
-          const communityObserver = new MutationObserver(function(mutations) {
-            setCommunityTopicIcons();
-          });
-          
-          communityObserver.observe(document.querySelector('.topics-list'), {
-            childList: true,
-            subtree: true
-          });
-        }
-      }
-      
-      // Call your existing bootContent function
-      bootContent();
-    });
+    const brand = detectBrand();
     
+    if (brand === 'team') {
+      // Only run on team brand and if we're on a community topics page
+      if (document.querySelector('.topics-list')) {
+        setCommunityTopicIcons();
+        
+        // Watch for dynamically loaded community topics
+        const communityObserver = new MutationObserver(function(mutations) {
+          setCommunityTopicIcons();
+        });
+        
+        communityObserver.observe(document.querySelector('.topics-list'), {
+          childList: true,
+          subtree: true
+        });
+      }
+    }
+    
+    // ============================================
     // BRAND-SPECIFIC CONTENT LOADING
+    // ============================================
     (async function bootContent() {
       try {
         const brand = detectBrand();
@@ -1245,52 +1238,53 @@ function setCommunityTopicIcons() {
           // TEAM BRAND: Load articles and top tags
           console.log("🚀 Loading content for Team brand...");
           
-          // Load recent articles
-          const articles = await fetchRecentlyUpdatedArticles(5);
-          if (articles && articles.length > 0) {
-            console.log("✅ Displaying recent articles:", articles.length);
-            displayRecentArticles("recent-articles", articles);
-          } else {
-            const container = qs("#recent-articles");
-            if (container) {
-              container.innerHTML = "<p>No recently updated articles found.</p>";
+          // Only load recent articles if the container exists
+          const recentArticlesContainer = document.getElementById('recent-articles');
+          if (recentArticlesContainer) {
+            const articles = await fetchRecentlyUpdatedArticles(5);
+            if (articles && articles.length > 0) {
+              console.log("✅ Displaying recent articles:", articles.length);
+              displayRecentArticles("recent-articles", articles);
+            } else {
+              recentArticlesContainer.innerHTML = "<p>No recently updated articles found.</p>";
             }
           }
 
-          // Load top tags (for common topics)
-          try {
-            const topTags = await fetchTopContentTags(3);
-            if (topTags && topTags.length > 0) {
-              console.log("✅ Displaying top tags:", topTags.length);
-              displayTopTagLinks("top-tags", topTags);
+          // Only load top tags if the container exists
+          const topTagsContainer = document.getElementById('top-tags');
+          if (topTagsContainer) {
+            try {
+              const topTags = await fetchTopContentTags(3);
+              if (topTags && topTags.length > 0) {
+                console.log("✅ Displaying top tags:", topTags.length);
+                displayTopTagLinks("top-tags", topTags);
+              }
+            } catch (error) {
+              console.log("⚠️ Top tags not available:", error);
             }
-          } catch (error) {
-            console.log("⚠️ Top tags not available:", error);
           }
           
         } else {
           // SUPPORT BRAND: Load FAQ sections
           console.log("🚀 Loading content for Support brand...");
           
-          // Your FAQ category ID
-          const FAQ_CATEGORY_ID = 12279744997263;
-          
-          // Try to fetch FAQ sections directly from category
-          const faqSections = await fetchFAQSectionsDirectly(FAQ_CATEGORY_ID);
-          
-          if (faqSections && faqSections.length > 0) {
-            console.log("✅ Displaying FAQ sections:", faqSections.length);
-            displayFAQSections("recent-articles", faqSections);
-          } else {
-            console.log("⚠️ No FAQ sections found, trying fallback method");
-            // Fallback: fetch by filtering all sections
-            const fallbackSections = await fetchFAQSectionsByID(FAQ_CATEGORY_ID);
-            if (fallbackSections && fallbackSections.length > 0) {
-              displayFAQSections("recent-articles", fallbackSections);
+          // Only load FAQ sections if the container exists
+          const recentArticlesContainer = document.getElementById('recent-articles');
+          if (recentArticlesContainer) {
+            const FAQ_CATEGORY_ID = 12279744997263;
+            
+            const faqSections = await fetchFAQSectionsDirectly(FAQ_CATEGORY_ID);
+            
+            if (faqSections && faqSections.length > 0) {
+              console.log("✅ Displaying FAQ sections:", faqSections.length);
+              displayFAQSections("recent-articles", faqSections);
             } else {
-              const container = qs("#recent-articles");
-              if (container) {
-                container.innerHTML = "<p>No FAQ sections found.</p>";
+              console.log("⚠️ No FAQ sections found, trying fallback method");
+              const fallbackSections = await fetchFAQSectionsByID(FAQ_CATEGORY_ID);
+              if (fallbackSections && fallbackSections.length > 0) {
+                displayFAQSections("recent-articles", fallbackSections);
+              } else {
+                recentArticlesContainer.innerHTML = "<p>No FAQ sections found.</p>";
               }
             }
           }
@@ -1300,12 +1294,13 @@ function setCommunityTopicIcons() {
         console.error("❌ Failed to load content:", error);
         const container = qs("#recent-articles");
         if (container) {
-          container.innerHTML =
-            "<p>Unable to load content. Please try again later.</p>";
+          container.innerHTML = "<p>Unable to load content. Please try again later.</p>";
         }
       }
     })();
-});
+
+  }); // This closes the main DOMContentLoaded event listener
+
 })(); // This closes the main IIFE - MAKE SURE THIS STAYS AT THE END
 
 document.addEventListener('DOMContentLoaded', function() {
