@@ -1048,7 +1048,7 @@ function setCommunityTopicIcons() {
           el && el.focus && el.focus();
         }
       })();
-
+      
       const commentContainerTextarea = qs(".comment-container textarea");
       const commentContainerFormControls = qs(
         ".comment-form-controls, .comment-ccs"
@@ -1208,6 +1208,41 @@ function setCommunityTopicIcons() {
         notificationElm.previousElementSibling.focus();
       }
     })();
+
+    // ============================================
+    // ADD THE COMMUNITY TOPIC ICONS INITIALIZATION HERE
+    // ============================================
+    
+    // Initialize community topic icons
+    setCommunityTopicIcons();
+  
+    // Watch for dynamically loaded community topics
+    const communityObserver = new MutationObserver(function(mutations) {
+      const hasNewTopics = mutations.some(mutation => {
+        return Array.from(mutation.addedNodes).some(node => {
+          return node.nodeType === 1 && (
+            node.classList?.contains('topics-item') ||
+            node.querySelector?.('.topics-item')
+          );
+        });
+      });
+      
+      if (hasNewTopics) {
+        setCommunityTopicIcons();
+      }
+    });
+  
+    // Only observe if we're on a page with community topics
+    if (document.querySelector('.topics-list')) {
+      communityObserver.observe(document.querySelector('.topics-list'), {
+        childList: true,
+        subtree: true
+      });
+    }
+    
+    // ============================================
+    // END OF COMMUNITY TOPIC ICONS INITIALIZATION
+    // ============================================
     
     // BRAND-SPECIFIC CONTENT LOADING
     (async function bootContent() {
