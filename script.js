@@ -654,30 +654,32 @@
 // COMMUNITY TOPIC ICON MAPPING
 // ============================================
 
-// Define your topic icon mappings (using the actual IDs from your console test)
+// 2. ADD THE COMMUNITY TOPIC ICON MAPPINGS (place this near other icon mappings)
 const COMMUNITY_TOPIC_ICONS = {
   // Feature Requests and stuff
-  '13442511768975': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M480-120q-75 0-140.5-28T225-225q-49-49-77-114.5T120-480q0-75 28-140.5T225-735q49-49 114.5-77T480-840q75 0 140.5 28T735-735q49 49 77 114.5T840-480q0 75-28 140.5T735-225q-49 49-114.5 77T480-120Zm0-72q120 0 204-84t84-204q0-120-84-204t-204-84q-120 0-204 84t-84 204q0 120 84 204t204 84Zm-54-62l260-260-52-52-208 208-102-102-52 52 154 154Z"/></svg>`,
+  '13442511768975': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M480-120q-75 0-140.5-28T225-225q-49-49-77-114.5T120-480q0-75 28-140.5T225-735q49-49 114.5-77T480-840q75 0 140.5 28T735-735q49 49 77 114.5T840-480q0 75-28 140.5T735-225q-49 49-114.5 77T480-120Zm0-72q120 0 204-84t84-204q0-120-84-204t-204-84q-120 0-204 84t-84 204q0 120 84 204t204 84Zm-54-62l260-260-52-52-208 208-102-102-52 52 154 154Z"/></svg>`,
   
   // Feedback and new ideas for things
-  '14344790141839': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M240-400h360v-72H240v72Zm0-120h480v-72H240v72Zm0-120h480v-72H240v72ZM96-96v-696q0-29.7 21.15-50.85Q138.3-864 168-864h624q29.7 0 50.85 21.15Q864-821.7 864-792v480q0 29.7-21.15 50.85Q821.7-240 792-240H240L96-96Z"/></svg>`,
+  '14344790141839': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M240-400h360v-72H240v72Zm0-120h480v-72H240v72Zm0-120h480v-72H240v72ZM96-96v-696q0-29.7 21.15-50.85Q138.3-864 168-864h624q29.7 0 50.85 21.15Q864-821.7 864-792v480q0 29.7-21.15 50.85Q821.7-240 792-240H240L96-96Z"/></svg>`,
   
-  // General Discussion  
-  '13442511765647': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M384-336v-72h336v72H384Zm0-144v-72h336v72H384ZM240-624v-72h480v72H240ZM720-96H168q-29.7 0-50.85-21.15Q96-138.3 96-168v-624q0-29.7 21.15-50.85Q138.3-864 168-864h624q29.7 0 50.85 21.15Q864-821.7 864-792v480L720-96Z"/></svg>`,
+  // General Discussion
+  '13442511765647': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M384-336v-72h336v72H384Zm0-144v-72h336v72H384ZM240-624v-72h480v72H240ZM720-96H168q-29.7 0-50.85-21.15Q96-138.3 96-168v-624q0-29.7 21.15-50.85Q138.3-864 168-864h624q29.7 0 50.85 21.15Q864-821.7 864-792v480L720-96Z"/></svg>`,
   
   // Noticeboard
-  '14344791722383': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M240-192v-384h-48v-192h264v-96h48v96h264v192h-48v384h-72v-384H552v384h-72v-384h-96v384h-144Zm0-456h480v-48H240v48Z"/></svg>`,
+  '14344791722383': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M240-192v-384h-48v-192h264v-96h48v96h264v192h-48v384h-72v-384H552v384h-72v-384h-96v384h-144Zm0-456h480v-48H240v48Z"/></svg>`,
   
   // Upcoming events
-  '14393248928655': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M576-96v-72h168v-264H216v168h-72v-432q0-29.7 21.15-50.85Q186.3-768 216-768h72v-96h72v96h240v-96h72v96h72q29.7 0 50.85 21.15Q816-725.7 816-696v528q0 29.7-21.15 50.85Q773.7-96 744-96H576ZM216-408h528v-288H216v288Zm0 0v-288 288ZM96-96v-192h192v192H96Z"/></svg>`
+  '14393248928655': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M576-96v-72h168v-264H216v168h-72v-432q0-29.7 21.15-50.85Q186.3-768 216-768h72v-96h72v96h240v-96h72v96h72q29.7 0 50.85 21.15Q816-725.7 816-696v528q0 29.7-21.15 50.85Q773.7-96 744-96H576ZM216-408h528v-288H216v288Zm0 0v-288 288ZM96-96v-192h192v192H96Z"/></svg>`
 };
 
-// Default fallback icon
+// Default fallback icon for community topics
 const DEFAULT_COMMUNITY_TOPIC_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>`;
 
-// Function to set community topic icons
+// 3. ADD THE FUNCTION TO SET COMMUNITY TOPIC ICONS
 function setCommunityTopicIcons() {
   const topicItems = document.querySelectorAll('.topics-item[data-topic-id]');
+  
+  if (topicItems.length === 0) return;
   
   topicItems.forEach(item => {
     const topicId = item.getAttribute('data-topic-id');
