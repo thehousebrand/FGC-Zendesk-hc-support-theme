@@ -645,11 +645,11 @@
 </g>
 </svg>`;
 
-  // ============================================
+// ============================================
 // COMMUNITY TOPIC ICON MAPPING
 // ============================================
 
-// Topic ID to Icon SVG mapping
+// Define your topic icon mappings (using the actual IDs from your console test)
 const COMMUNITY_TOPIC_ICONS = {
   // Feature Requests and stuff
   '13442511768975': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M480-120q-75 0-140.5-28T225-225q-49-49-77-114.5T120-480q0-75 28-140.5T225-735q49-49 114.5-77T480-840q75 0 140.5 28T735-735q49 49 77 114.5T840-480q0 75-28 140.5T735-225q-49 49-114.5 77T480-120Zm0-72q120 0 204-84t84-204q0-120-84-204t-204-84q-120 0-204 84t-84 204q0 120 84 204t204 84Zm-54-62l260-260-52-52-208 208-102-102-52 52 154 154Z"/></svg>`,
@@ -667,8 +667,8 @@ const COMMUNITY_TOPIC_ICONS = {
   '14393248928655': `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M576-96v-72h168v-264H216v168h-72v-432q0-29.7 21.15-50.85Q186.3-768 216-768h72v-96h72v96h240v-96h72v96h72q29.7 0 50.85 21.15Q816-725.7 816-696v528q0 29.7-21.15 50.85Q773.7-96 744-96H576ZM216-408h528v-288H216v288Zm0 0v-288 288ZM96-96v-192h192v192H96Z"/></svg>`
 };
 
-// Default icon for community topics without specific mapping
-const DEFAULT_COMMUNITY_TOPIC_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M380-564Zm-32 252H180q-15.3 0-25.65-10.4Q144-332.81 144-348.19V-369q0-8 3-14.5t8-11.5l85-85v-264h-12q-15.3 0-25.65-10.29Q192-764.58 192-779.79t10.35-25.71Q212.7-816 228-816h145q15.3 0 25.65 10.29Q409-795.42 409-780.21t-10.35 25.71Q388.3-744 373-744h-61v264q0 14.22-5 27.11Q302-440 291-429l-45 45h294q15.3 0 25.65 10.29Q576-363.42 576-348.21t-10.35 25.71Q555.3-312 540-312H420v222q0 15.3-10.29 25.65Q399.42-54 384.21-54T358.5-64.35Q348-74.7 348-90v-222Zm275.77-120Q544-432 488-488.16 432-544.32 432-624q0-80.92 56-137.96Q544-819 624-816t136 58q56 55 56 134.48 0 79.48-56.23 135.5-56.22 56.02-136 56.02Zm.23-192q25 0 42.5-17.5T684-684q0-25-17.5-42.5T624-744q-25 0-42.5 17.5T564-684q0 25 17.5 42.5T624-624Zm0 120q26 0 50.5-11.5T716-547q5-5 3-12.5t-9-10.5q-19.95-9-41.47-13.5Q647-588 624.21-588q-22.8 0-44.5 4.5Q558-579 538-570q-7 3-9 10.5t3 12.5q17 20 41.5 31.5T624-504Z"/></svg>`;
+// Default fallback icon
+const DEFAULT_COMMUNITY_TOPIC_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>`;
 
 // Function to set community topic icons
 function setCommunityTopicIcons() {
@@ -678,12 +678,20 @@ function setCommunityTopicIcons() {
     const topicId = item.getAttribute('data-topic-id');
     const iconWrapper = item.querySelector('.topic-icon-wrapper');
     
-    if (iconWrapper && !iconWrapper.hasChildNodes()) { // Only set if not already set
+    if (iconWrapper && !iconWrapper.hasChildNodes()) {
       // Use specific icon for this topic ID, or fall back to default
       const icon = COMMUNITY_TOPIC_ICONS[topicId] || DEFAULT_COMMUNITY_TOPIC_ICON;
       iconWrapper.innerHTML = icon;
     }
   });
+}
+
+// Run when DOM is ready
+document.addEventListener('DOMContentLoaded', setCommunityTopicIcons);
+
+// Also run if content is dynamically loaded
+if (typeof HelpCenter !== 'undefined' && HelpCenter.ready) {
+  HelpCenter.ready(setCommunityTopicIcons);
 }
 
   // Renderers - FAQ Sections (for support brand)
