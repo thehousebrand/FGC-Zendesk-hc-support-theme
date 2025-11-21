@@ -1225,34 +1225,39 @@ if (typeof HelpCenter !== 'undefined' && HelpCenter.ready) {
     })();
 
     // ============================================
-    // ADD THE COMMUNITY TOPIC ICONS INITIALIZATION HERE
+    // COMMUNITY TOPIC ICONS INITIALIZATION - TEAM BRAND ONLY
     // ============================================
     
-    // Initialize community topic icons
-    setCommunityTopicIcons();
-  
-    // Watch for dynamically loaded community topics
-    const communityObserver = new MutationObserver(function(mutations) {
-      const hasNewTopics = mutations.some(mutation => {
-        return Array.from(mutation.addedNodes).some(node => {
-          return node.nodeType === 1 && (
-            node.classList?.contains('topics-item') ||
-            node.querySelector?.('.topics-item')
-          );
+    // BRAND-SPECIFIC INITIALIZATION
+    const brand = detectBrand();
+    
+    if (brand === 'team') {
+      // Initialize community topic icons ONLY for team brand
+      setCommunityTopicIcons();
+    
+      // Watch for dynamically loaded community topics
+      const communityObserver = new MutationObserver(function(mutations) {
+        const hasNewTopics = mutations.some(mutation => {
+          return Array.from(mutation.addedNodes).some(node => {
+            return node.nodeType === 1 && (
+              node.classList?.contains('topics-item') ||
+              node.querySelector?.('.topics-item')
+            );
+          });
         });
+        
+        if (hasNewTopics) {
+          setCommunityTopicIcons();
+        }
       });
-      
-      if (hasNewTopics) {
-        setCommunityTopicIcons();
+    
+      // Only observe if we're on a page with community topics
+      if (document.querySelector('.topics-list')) {
+        communityObserver.observe(document.querySelector('.topics-list'), {
+          childList: true,
+          subtree: true
+        });
       }
-    });
-  
-    // Only observe if we're on a page with community topics
-    if (document.querySelector('.topics-list')) {
-      communityObserver.observe(document.querySelector('.topics-list'), {
-        childList: true,
-        subtree: true
-      });
     }
     
     // ============================================
