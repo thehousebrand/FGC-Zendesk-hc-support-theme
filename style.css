@@ -1641,7 +1641,7 @@ a.sign-in:hover{
   display: flex;
   align-items: flex-end;
   flex: 1 0 340px;
-  margin: 0 0 30px;
+  margin: 0 0 8px;
   max-width: 100%;
   text-align: left;
   background: #FFEACB;
@@ -1700,7 +1700,8 @@ a.sign-in:hover{
   font-family: 'Recoleta';
   font-weight: 600;
   margin-bottom: 0;
-  font-size: 28px;
+  font-size: clamp(1.4rem, 4vw, 1.5rem);
+  line-height: 1.2;
 }
 .blocks-item-description {
   margin: 0;
@@ -1743,7 +1744,7 @@ a.sign-in:hover{
 @media (min-width: 1024px) {
   .promoted-articles {
     flex-direction: row;
-    padding-bottom: 30px;
+    padding-bottom: 8px;
   }
 }
 .promoted-articles-item {
@@ -1754,8 +1755,8 @@ a.sign-in:hover{
   .promoted-articles-item {
     align-self: flex-end;
     flex: 0 0 auto;
-    padding-right: 8px;
-    width: 50%; /* Three columns on desktop */
+    width: 100%; /* Three columns on desktop */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
   }
   [dir=rtl] .promoted-articles-item {
     padding: 0 0 0 30px;
@@ -1768,15 +1769,13 @@ a.sign-in:hover{
   display: flex;
   flex-direction: row;
   gap: 4px;
-  border-bottom: 0;
   padding: 32px 16px;
-  border-radius: 4px;
-  background: #FFEACB;
-  font-size: 18px;
+  background-color: #f6efe7;
+  font-size: clamp(1.4rem, 4vw, 1.5rem);
   font-family: 'Recoleta';
   font-weight: 600;
-  line-height: 20px;
-  text-decoration: none;
+  line-height: 1.2;
+  text-decoration: none;    
 }
 .promoted-articles-item a:hover {
   text-decoration: underline;
@@ -1850,6 +1849,7 @@ a.sign-in:hover{
   background-color: #f6efe7;
 }
 .recent-activity-item h3 {
+  font-size: clamp(1.4rem, 4vw, 1.5rem);
   margin: 0;
 }
 .recent-activity-item-parent {
@@ -2899,7 +2899,7 @@ a.sign-in:hover{
   font-weight: 600;
   line-height: 27px;
   margin-block-end: 0;
-  margin-bottom:30px;
+  margin-bottom:15px;
 }
 .community-featured-posts, .community-activity {
   padding-top: 40px;
@@ -5509,7 +5509,11 @@ zd-summary-block {
   		margin: 0;
 		}
 }
-
+.card-header{
+    display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
 .card-content {
   display: flex;
