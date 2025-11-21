@@ -1212,7 +1212,8 @@ function setCommunityTopicIcons() {
     
     if (brand === 'team') {
       // Only run on team brand and if we're on a community topics page
-      if (document.querySelector('.topics-list')) {
+      const topicsList = document.querySelector('.topics-list');
+      if (topicsList) {
         setCommunityTopicIcons();
         
         // Watch for dynamically loaded community topics
@@ -1220,7 +1221,7 @@ function setCommunityTopicIcons() {
           setCommunityTopicIcons();
         });
         
-        communityObserver.observe(document.querySelector('.topics-list'), {
+        communityObserver.observe(topicsList, {
           childList: true,
           subtree: true
         });
