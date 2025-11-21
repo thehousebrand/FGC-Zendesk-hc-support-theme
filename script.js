@@ -1225,7 +1225,7 @@ if (typeof HelpCenter !== 'undefined' && HelpCenter.ready) {
     })();
 
     // ============================================
-    // COMMUNITY TOPIC ICONS INITIALIZATION - TEAM BRAND ONLY
+    // COMMUNITY TOPIC ICONS INITIALIZATION - TEAM BRAND ONLY 
     // ============================================
     
     // BRAND-SPECIFIC INITIALIZATION
