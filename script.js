@@ -283,17 +283,22 @@
   }
 
   // Brand detection helper
+  // 1. UPDATE THE BRAND DETECTION FUNCTION
   function detectBrand() {
-    // Check for team-specific elements that would only exist in the team brand
-    const teamElements = qs('.common-topics'); // This element only exists in team brand based on your template
-    const playbooks = qs('a[href*="13449690492559"]'); // Playbooks category link
+    // Check the current domain/subdomain
+    const hostname = window.location.hostname;
     
-    if (teamElements || playbooks) {
+    if (hostname.includes('team.thefeelgoodclinic.com')) {
       console.log("🏢 Detected: Team brand");
       return 'team';
-    } else {
+    } else if (hostname.includes('support.thefeelgoodclinic.com')) {
       console.log("🏥 Detected: Support brand");
       return 'support';
+    } else {
+      // Default fallback - check for URL patterns
+      const isTeam = window.location.href.includes('/community/');
+      console.log(isTeam ? "🏢 Detected: Team brand (by URL)" : "🏥 Detected: Support brand (default)");
+      return isTeam ? 'team' : 'support';
     }
   }
 
