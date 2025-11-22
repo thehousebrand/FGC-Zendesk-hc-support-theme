@@ -102,13 +102,16 @@
           <li class="promoted-articles-item">
             <a href="{{url}}">
               {{title}}
+              {{#if topic.name}}
+              <p class="featured-post-topic">{{topic.name}}</p>
+              {{/if}}
             </a>
           </li>
         {{/each}}
       </ul>
     </section>
   {{/if}}
-
+  
   <section class="community-activity activity">
     {{#if help_center.community_enabled}}
       <!-- JS script overrides this and flips order - see scripts.js -->
