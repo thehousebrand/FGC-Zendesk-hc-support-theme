@@ -146,9 +146,10 @@
         {{#each featured_posts}}
           <li class="promoted-articles-item">
             <a href="{{url}}">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="star-icon">
-              <path d="M4.895 13.3897C4.51672 13.6179 4.05003 13.2793 4.1496 12.8489L4.96666 9.31665L2.22582 6.94041C1.89205 6.65105 2.07003 6.1027 2.51011 6.0645L6.13333 5.74998L7.53944 2.42302C7.71151 2.01589 8.28848 2.01589 8.46055 2.42302L9.86666 5.74998L13.4899 6.0645C13.93 6.1027 14.1079 6.65104 13.7742 6.94041L11.0333 9.31665L11.8504 12.8489C11.95 13.2793 11.4833 13.6179 11.105 13.3897L8 11.5166L4.895 13.3897Z" fill="#BD96CE"></path>
-            </svg>{{title}}
+              {{title}}
+              {{#if topic.name}}
+              <p class="featured-post-topic">{{topic.name}}</p>
+              {{/if}}
             </a>
           </li>
         {{/each}}
