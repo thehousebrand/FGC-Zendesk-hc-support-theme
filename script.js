@@ -1300,6 +1300,73 @@ function setCommunityTopicIcons() {
       }
     })();  // This self-invokes the bootContent function
 
+    // ============================================
+    // RECENT ACTIVITY ORDER SWAP - SIMPLIFIED
+    // ============================================
+    (function() {
+      console.log('Recent activity swap script initialized');
+      
+      let hasSwapped = {};
+      
+      function swapRecentActivityOrder() {
+        const items = document.querySelectorAll('.recent-activity-item');
+        
+        if (items.length === 0) {
+          return false;
+        }
+        
+        let swappedCount = 0;
+        
+        items.forEach((item) => {
+          // Create a unique identifier for this item
+          const itemText = item.textContent.trim();
+          const itemId = itemText.substring(0, 50);
+          
+          // Skip if we've already swapped this exact item
+          if (hasSwapped[itemId]) {
+            return;
+          }
+          
+          const parentDiv = item.querySelector('.recent-activity-item-parent');
+          const linkDiv = item.querySelector('.recent-activity-item-link');
+          
+          if (parentDiv && linkDiv) {
+            // Just swap them - no need to check specific names
+            const tempHTML = parentDiv.innerHTML;
+            parentDiv.innerHTML = linkDiv.innerHTML;
+            linkDiv.innerHTML = tempHTML;
+            
+            hasSwapped[itemId] = true;
+            swappedCount++;
+          }
+        });
+        
+        if (swappedCount > 0) {
+          console.log('Swapped ' + swappedCount + ' items');
+        }
+        
+        return true;
+      }
+      
+      function maintainSwap() {
+        swapRecentActivityOrder();
+      }
+      
+      const observer = new MutationObserver(function(mutations) {
+        maintainSwap();
+      });
+      
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+      
+      setInterval(maintainSwap, 500);
+      setTimeout(maintainSwap, 1000);
+      
+      console.log('Persistent swap monitoring active');
+    })();
+
   }); // This closes the main DOMContentLoaded event listener from line 863 
 
 })(); // This closes the main IIFE - MAKE SURE THIS STAYS AT THE END
