@@ -1411,4 +1411,4 @@ document.addEventListener('DOMContentLoaded', function() {
     emptyMessage.textContent = 'No posts have been featured yet.';
     featuredList.replaceWith(emptyMessage);
   }
-});
+})();
