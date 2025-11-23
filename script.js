@@ -721,11 +721,22 @@ async function addTopicsToFeaturedPosts() {
       // Check if we've already added the topic (to prevent duplicates)
       if (link.querySelector('.featured-post-topic')) continue;
       
-      // Add topic name INSIDE the link, below the title
+      // Wrap the existing title text in a span
+      const titleText = link.textContent.trim();
+      link.textContent = ''; // Clear the link
+      
+      const titleElement = document.createElement('span');
+      titleElement.className = 'featured-post-title recent-activity-item-link';
+      titleElement.textContent = titleText;
+      
+      // Create topic element
       const topicElement = document.createElement('p');
       topicElement.className = 'featured-post-topic recent-activity-item-parent';
       topicElement.textContent = topicName;
-      link.appendChild(topicElement);  // Changed from insertAdjacentElement to appendChild
+      
+      // Add both to the link
+      link.appendChild(titleElement);
+      link.appendChild(topicElement);
       
     } catch (error) {
       console.error('Error fetching topic for post:', postId, error);
