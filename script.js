@@ -721,6 +721,9 @@ async function addTopicsToFeaturedPosts() {
       // Check if we've already added the topic (to prevent duplicates)
       if (link.querySelector('.featured-post-topic')) continue;
       
+      // Force link to display as block to stack children vertically
+      link.style.display = 'block';
+      
       // Wrap the existing title text in a div (block element)
       const titleText = link.textContent.trim();
       link.textContent = ''; // Clear the link
