@@ -719,19 +719,19 @@ async function addTopicsToFeaturedPosts() {
       const topicName = topicData.topic.name;
       
       // Check if we've already added the topic (to prevent duplicates)
-      if (item.querySelector('.featured-post-topic')) continue;
+      if (link.querySelector('.featured-post-topic')) continue;
       
-      // Add topic name below the title
+      // Add topic name INSIDE the link, below the title
       const topicElement = document.createElement('p');
       topicElement.className = 'featured-post-topic recent-activity-item-parent';
       topicElement.textContent = topicName;
-      link.insertAdjacentElement('afterend', topicElement);
+      link.appendChild(topicElement);  // Changed from insertAdjacentElement to appendChild
       
     } catch (error) {
       console.error('Error fetching topic for post:', postId, error);
     }
   }
-}  
+}
 
   // Renderers - FAQ Sections (for support brand)
   function displayFAQSections(containerId, sections) {
