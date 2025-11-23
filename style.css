@@ -6237,11 +6237,11 @@ html {
 }
 
 /* Keep list hidden until topics are added */
-.community-featured-posts .promoted-articles {
+/*.community-featured-posts .promoted-articles {
   opacity: 0;
   transition: opacity 0.3s ease-in;
 }
 
 .community-featured-posts .promoted-articles.loaded {
   opacity: 1;
-}
+} */
