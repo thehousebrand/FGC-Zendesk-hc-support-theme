@@ -681,6 +681,58 @@ function setCommunityTopicIcons() {
   });
 }
 
+// ============================================
+// FEATURED POSTS - ADD TOPIC NAMES
+// ============================================
+async function addTopicsToFeaturedPosts() {
+  const featuredItems = document.querySelectorAll('.community-featured-posts .promoted-articles li');
+  
+  for (const item of featuredItems) {
+    const link = item.querySelector('a');
+    if (!link) continue;
+    
+    // Skip the "Feature a post" admin link
+    if (link.textContent.trim() === 'Feature a post') continue;
+    
+    // Extract post ID from URL (format: /hc/en-au/community/posts/XXXXX-post-title)
+    const urlParts = link.href.split('/');
+    const postIdWithSlug = urlParts[urlParts.length - 1];
+    const postId = postIdWithSlug.split('-')[0];
+    
+    if (!postId) continue;
+    
+    try {
+      // Fetch post details to get topic_id
+      const postResponse = await fetch(`/api/v2/community/posts/${postId}.json`);
+      if (!postResponse.ok) continue;
+      
+      const postData = await postResponse.json();
+      const topicId = postData.post.topic_id;
+      
+      if (!topicId) continue;
+      
+      // Fetch topic details to get topic name
+      const topicResponse = await fetch(`/api/v2/community/topics/${topicId}.json`);
+      if (!topicResponse.ok) continue;
+      
+      const topicData = await topicResponse.json();
+      const topicName = topicData.topic.name;
+      
+      // Check if we've already added the topic (to prevent duplicates)
+      if (item.querySelector('.featured-post-topic')) continue;
+      
+      // Add topic name below the title
+      const topicElement = document.createElement('p');
+      topicElement.className = 'featured-post-topic recent-activity-item-parent';
+      topicElement.textContent = topicName;
+      link.insertAdjacentElement('afterend', topicElement);
+      
+    } catch (error) {
+      console.error('Error fetching topic for post:', postId, error);
+    }
+  }
+}  
+
   // Renderers - FAQ Sections (for support brand)
   function displayFAQSections(containerId, sections) {
     const container = qs(`#${containerId}`);
@@ -1222,6 +1274,23 @@ function setCommunityTopicIcons() {
         });
         
         communityObserver.observe(topicsList, {
+          childList: true,
+          subtree: true
+        });
+      }
+
+      // ADD THIS NEW SECTION:
+      // Initialize featured posts with topics
+      const featuredSection = document.querySelector('.community-featured-posts');
+      if (featuredSection) {
+        addTopicsToFeaturedPosts();
+        
+        // Watch for dynamically loaded featured posts
+        const featuredObserver = new MutationObserver(function(mutations) {
+          addTopicsToFeaturedPosts();
+        });
+        
+        featuredObserver.observe(featuredSection, {
           childList: true,
           subtree: true
         });
