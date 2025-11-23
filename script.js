@@ -1301,7 +1301,7 @@ function setCommunityTopicIcons() {
     })();  // This self-invokes the bootContent function
 
     // ============================================
-    // RECENT ACTIVITY ORDER SWAP - SIMPLIFIED
+    // RECENT ACTIVITY ORDER SWAP - FIXED
     // ============================================
     (function() {
       console.log('Recent activity swap script initialized');
@@ -1331,18 +1331,44 @@ function setCommunityTopicIcons() {
           const linkDiv = item.querySelector('.recent-activity-item-link');
           
           if (parentDiv && linkDiv) {
-            // Just swap them - no need to check specific names
-            const tempHTML = parentDiv.innerHTML;
-            parentDiv.innerHTML = linkDiv.innerHTML;
-            linkDiv.innerHTML = tempHTML;
+            // Get the text content to check what type of item this is
+            const parentText = parentDiv.textContent.trim();
+            const linkText = linkDiv.textContent.trim();
             
-            hasSwapped[itemId] = true;
-            swappedCount++;
+            // Only swap if it looks like a community post (has a topic name in parent)
+            // Common community topics: Noticeboard, General Discussion, Feature Requests, Feedback, Upcoming events
+            // System updates should NOT be swapped as they don't have topics
+            
+            // Check if parentDiv contains a known topic or looks like a topic (shorter text)
+            // and linkDiv looks like a post title (usually longer)
+            const looksLikeCommunityPost = (
+              parentText.includes('Noticeboard') ||
+              parentText.includes('General Discussion') ||
+              parentText.includes('Feature Requests') ||
+              parentText.includes('Feedback') ||
+              parentText.includes('Upcoming events') ||
+              // Or if parent is short (topic) and link is long (post title)
+              (parentText.length < 50 && linkText.length > parentText.length)
+            );
+            
+            // Don't swap if it's clearly a System updates post
+            const isSystemUpdate = linkText.includes('System updates') || 
+                                   parentText.includes('Help centre updates');
+            
+            if (looksLikeCommunityPost && !isSystemUpdate) {
+              // Swap them
+              const tempHTML = parentDiv.innerHTML;
+              parentDiv.innerHTML = linkDiv.innerHTML;
+              linkDiv.innerHTML = tempHTML;
+              
+              hasSwapped[itemId] = true;
+              swappedCount++;
+            }
           }
         });
         
         if (swappedCount > 0) {
-          console.log('Swapped ' + swappedCount + ' items');
+          console.log('Swapped ' + swappedCount + ' community post items');
         }
         
         return true;
