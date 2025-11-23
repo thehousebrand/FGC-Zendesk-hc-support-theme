@@ -36,8 +36,10 @@
     {{/if}}
     <nav class="user-nav" id="user-nav" aria-label="{{t 'user_navigation'}}">
       <ul class="user-nav-list">
-        <li><a href="/" class="tbc">Knowledge base</a></li><!-- format correctly -->
-        <li>{{link 'community'}}</li>
+        {{#if help_center.community_enabled}}
+          <li><a href="/" class="tbc">Knowledge base</a></li><!-- format correctly -->
+          <li>{{link 'community'}}</li>
+        {{/if}}
         {{#unless signed_in}}
           <li>
             {{#link "sign_in" class="sign-in"}}
