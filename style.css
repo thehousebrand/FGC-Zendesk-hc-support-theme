@@ -6228,20 +6228,3 @@ svg[data-garden-id='dropdowns.combobox.input_icon'] {
 html {
   scroll-behavior: smooth;
 }
-
-/* Pre-style featured posts to match final state */
-.community-featured-posts .promoted-articles li a {
-  display: block;
-  font-size: 1rem; /* Match recent-activity-item-link size */
-  line-height: 1.5;
-}
-
-/* Keep list hidden until topics are added */
-/*.community-featured-posts .promoted-articles {
-  opacity: 0;
-  transition: opacity 0.3s ease-in;
-}
-
-.community-featured-posts .promoted-articles.loaded {
-  opacity: 1;
-} */
