@@ -1285,7 +1285,6 @@ async function addTopicsToFeaturedPosts() {
       if (featuredSection) {
         addTopicsToFeaturedPosts();
         
-        // Watch for dynamically loaded featured posts
         const featuredObserver = new MutationObserver(function(mutations) {
           addTopicsToFeaturedPosts();
         });
@@ -1294,6 +1293,32 @@ async function addTopicsToFeaturedPosts() {
           childList: true,
           subtree: true
         });
+        
+        // Move "Feature a post" admin link to separate admin section
+        const featuredList = featuredSection.querySelector('.promoted-articles');
+        if (featuredList) {
+          const items = featuredList.querySelectorAll('li');
+          items.forEach(item => {
+            const link = item.querySelector('a');
+            if (link && link.textContent.trim() === 'Feature a post') {
+              const href = link.href;
+              item.remove();
+              
+              const adminActions = document.createElement('div');
+              adminActions.className = 'community-admin-actions';
+              adminActions.innerHTML = `<a href="${href}" class="feature-post-link">Feature a post</a>`;
+              featuredList.insertAdjacentElement('afterend', adminActions);
+            }
+          });
+          
+          // Show message if no actual featured posts exist
+          if (featuredList.children.length === 0) {
+            const emptyMessage = document.createElement('p');
+            emptyMessage.className = 'no-featured-posts';
+            emptyMessage.textContent = 'No posts have been featured yet.';
+            featuredList.replaceWith(emptyMessage);
+          }
+        }
       }
     }
     
@@ -1437,45 +1462,3 @@ async function addTopicsToFeaturedPosts() {
   }); // This closes the main DOMContentLoaded event listener from line 863 
 
 })(); // This closes the main IIFE - MAKE SURE THIS STAYS AT THE END
-
-document.addEventListener('DOMContentLoaded', function() {
-  // Target the featured posts section specifically
-  const featuredSection = document.querySelector('.community-featured-posts');
-  if (!featuredSection) return;
-  
-  const featuredList = featuredSection.querySelector('.promoted-articles');
-  if (!featuredList) return;
-  
-  // Find the "Feature a post" item
-  const items = featuredList.querySelectorAll('li');
-  items.forEach(item => {
-    const link = item.querySelector('a');
-    if (link && link.textContent.trim() === 'Feature a post') {
-      // Store the link href
-      const href = link.href;
-      
-      // Remove the item from the list
-      item.remove();
-      
-      // Create a new container for admin actions
-      const adminActions = document.createElement('div');
-      adminActions.className = 'community-admin-actions';
-      adminActions.innerHTML = `<a href="${href}" class="feature-post-link">Feature a post</a>`;
-      
-      // Insert after the promoted articles list
-      featuredList.insertAdjacentElement('afterend', adminActions);
-    }
-  });
-  
-  // Hide the entire section if the list is now empty (no actual featured posts)
-  if (featuredList.children.length === 0) {
-    // Option 1: Hide the entire section
-    // featuredSection.style.display = 'none';
-    
-    // Option 2: Show a message (better UX for admins)
-    const emptyMessage = document.createElement('p');
-    emptyMessage.className = 'no-featured-posts';
-    emptyMessage.textContent = 'No posts have been featured yet.';
-    featuredList.replaceWith(emptyMessage);
-  }
-})();
