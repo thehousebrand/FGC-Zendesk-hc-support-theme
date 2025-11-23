@@ -1301,12 +1301,13 @@ function setCommunityTopicIcons() {
     })();  // This self-invokes the bootContent function
 
     // ============================================
-    // RECENT ACTIVITY ORDER SWAP - DYNAMIC VERSION
+    // RECENT ACTIVITY ORDER SWAP - FIXED VERSION
     // ============================================
     (function() {
       console.log('Recent activity swap script initialized');
       
-      let hasSwapped = {};
+      // Use a WeakSet to track swapped elements directly
+      const swappedElements = new WeakSet();
       
       function swapRecentActivityOrder() {
         const items = document.querySelectorAll('.recent-activity-item');
@@ -1318,12 +1319,8 @@ function setCommunityTopicIcons() {
         let swappedCount = 0;
         
         items.forEach((item) => {
-          // Create a unique identifier for this item
-          const itemText = item.textContent.trim();
-          const itemId = itemText.substring(0, 50);
-          
-          // Skip if we've already swapped this exact item
-          if (hasSwapped[itemId]) {
+          // Skip if we've already swapped this element
+          if (swappedElements.has(item)) {
             return;
           }
           
@@ -1331,38 +1328,30 @@ function setCommunityTopicIcons() {
           const linkDiv = item.querySelector('.recent-activity-item-link');
           
           if (parentDiv && linkDiv) {
-            // Check if this is a community post by looking for the structure
-            // Community posts have the link pointing to /community/posts/
-            const linkElement = linkDiv.querySelector('a');
-            const isCommunityPost = linkElement && linkElement.href.includes('/community/posts/');
+            // Swap the content
+            const tempHTML = parentDiv.innerHTML;
+            parentDiv.innerHTML = linkDiv.innerHTML;
+            linkDiv.innerHTML = tempHTML;
             
-            // Only swap if it's a community post (which has topic in parent, post title in link)
-            if (isCommunityPost) {
-              // Swap them
-              const tempHTML = parentDiv.innerHTML;
-              parentDiv.innerHTML = linkDiv.innerHTML;
-              linkDiv.innerHTML = tempHTML;
-              
-              hasSwapped[itemId] = true;
-              swappedCount++;
-            }
-            // If it's not a community post (e.g., article, system update), leave it as is
+            // Mark this element as swapped
+            swappedElements.add(item);
+            swappedCount++;
           }
         });
         
         if (swappedCount > 0) {
-          console.log('Swapped ' + swappedCount + ' community post items');
+          console.log('Swapped ' + swappedCount + ' items');
         }
         
         return true;
       }
       
-      function maintainSwap() {
-        swapRecentActivityOrder();
-      }
+      // Initial swap
+      swapRecentActivityOrder();
       
+      // Watch for new items being added
       const observer = new MutationObserver(function(mutations) {
-        maintainSwap();
+        swapRecentActivityOrder();
       });
       
       observer.observe(document.body, {
@@ -1370,8 +1359,8 @@ function setCommunityTopicIcons() {
         subtree: true
       });
       
-      setInterval(maintainSwap, 500);
-      setTimeout(maintainSwap, 1000);
+      // Also run periodically to catch any reverts
+      setInterval(swapRecentActivityOrder, 1000);
       
       console.log('Persistent swap monitoring active');
     })();
