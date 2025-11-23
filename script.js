@@ -721,15 +721,15 @@ async function addTopicsToFeaturedPosts() {
       // Check if we've already added the topic (to prevent duplicates)
       if (link.querySelector('.featured-post-topic')) continue;
       
-      // Wrap the existing title text in a span
+      // Wrap the existing title text in a div (block element)
       const titleText = link.textContent.trim();
       link.textContent = ''; // Clear the link
       
-      const titleElement = document.createElement('span');
+      const titleElement = document.createElement('div');
       titleElement.className = 'featured-post-title recent-activity-item-link';
       titleElement.textContent = titleText;
       
-      // Create topic element
+      // Create topic element (p is already block-level)
       const topicElement = document.createElement('p');
       topicElement.className = 'featured-post-topic recent-activity-item-parent';
       topicElement.textContent = topicName;
