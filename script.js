@@ -685,7 +685,13 @@ function setCommunityTopicIcons() {
 // FEATURED POSTS - ADD TOPIC NAMES
 // ============================================
 async function addTopicsToFeaturedPosts() {
-  const featuredItems = document.querySelectorAll('.community-featured-posts .promoted-articles li');
+  const featuredList = document.querySelector('.community-featured-posts .promoted-articles');
+  if (!featuredList) return;
+  
+  // Keep it hidden while we process
+  featuredList.classList.remove('loaded');
+  
+  const featuredItems = featuredList.querySelectorAll('li');
   
   for (const item of featuredItems) {
     const link = item.querySelector('a');
@@ -745,6 +751,9 @@ async function addTopicsToFeaturedPosts() {
       console.error('Error fetching topic for post:', postId, error);
     }
   }
+  
+  // Show the list with a smooth fade-in after processing is complete
+  featuredList.classList.add('loaded');
 }
 
   // Renderers - FAQ Sections (for support brand)
