@@ -726,12 +726,12 @@ async function addTopicsToFeaturedPosts() {
       link.textContent = ''; // Clear the link
       
       const titleElement = document.createElement('div');
-      titleElement.className = 'featured-post-title recent-activity-item-link';
+      titleElement.className = 'featured-post-title recent-activity-item-parent';
       titleElement.textContent = titleText;
       
       // Create topic element (p is already block-level)
       const topicElement = document.createElement('p');
-      topicElement.className = 'featured-post-topic recent-activity-item-parent';
+      topicElement.className = 'featured-post-topic recent-activity-item-link';
       topicElement.textContent = topicName;
       
       // Add both to the link
