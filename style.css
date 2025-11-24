@@ -828,6 +828,14 @@ ul {
 .user-nav-list > li {
   display: inline-block;
 }
+.user-nav-list > li a{
+  color: #fff;
+  text-decoration: none;
+}
+.user-nav-list > li a:hover{
+  color: #fff;
+  text-decoration: underline;
+}
 a.sign-in{
   color: #FFF !important;
 } 
@@ -1744,12 +1752,12 @@ a.sign-in:hover{
 @media (min-width: 1024px) {
   .promoted-articles {
     flex-direction: row;
-    padding-bottom: 8px;
   }
 }
 .promoted-articles-item {
   flex: 1 0 auto;
-  margin-bottom:8px;
+  /*margin-bottom:8px;*/
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 @media (min-width: 1024px) {
   .promoted-articles-item {
@@ -1762,16 +1770,26 @@ a.sign-in:hover{
     padding: 0 0 0 30px;
   }
 }
+.promoted-articles-item p {
+    font-family: 'SF Pro';
+  	font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  margin: 0;
+}
 .promoted-articles-item:nth-child(3n) {
   padding-right: 0;
 }
 .promoted-articles-item a {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 4px;
-  padding: 32px 16px;
+  padding: 16px 16px;
   background-color: #f6efe7;
-  font-size: clamp(1.4rem, 4vw, 1.5rem);
+  font-size: 18px;
+  /*font-size: clamp(1.4rem, 4vw, 1.5rem);*/
   font-family: 'Recoleta';
   font-weight: 600;
   line-height: 1.2;
@@ -2883,7 +2901,7 @@ a.sign-in:hover{
   margin-bottom: 32px;
 }
 .community-footer {
-  padding-top: 50px;
+  padding: 50px 0;
   text-align: center;
 }
 .community-footer-title {
@@ -2901,7 +2919,11 @@ a.sign-in:hover{
   margin-block-end: 0;
   margin-bottom:15px;
 }
-.community-featured-posts, .community-activity {
+.community-featured-posts {
+  padding-top: 80px;
+  width: 100%;
+}
+.community-activity {
   padding-top: 40px;
   width: 100%;
 }
@@ -2952,6 +2974,9 @@ a.sign-in:hover{
     padding-bottom: 10px;
   }
 }
+.topic-filters {
+  width: 100%;
+}
 .topic-header .dropdown {
   display: block;
   border-top: 1px solid #ddd;
@@ -2969,6 +2994,9 @@ a.sign-in:hover{
 .no-posts-with-filter {
   margin-top: 20px;
   margin-bottom: 20px;
+}
+.community-admin-actions{
+  padding-top: 15px;
 }
 
 /* Topic, post and user follow button */
@@ -3053,6 +3081,7 @@ a.sign-in:hover{
   padding: 16px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
   background-color: #f6efe7;
+  gap: 8px;
 }
 @media (min-width: 768px) {
   .striped-list-item {
