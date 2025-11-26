@@ -1876,7 +1876,7 @@ a.sign-in:hover{
   line-height: 20px;
 }
 .recent-activity-item-parent, .recent-activity-item-link {
-  margin: 6px 0;
+  margin: 2px 0;
   display: inline-block;
   width: 100%;
   text-decoration: none;
@@ -1897,7 +1897,7 @@ a.sign-in:hover{
 }
 .recent-activity-item-meta {
   color: $text_color;
-  margin: 15px 0 0 0;
+  margin: 0;
   float: none;
 }
 @media (min-width: 768px) {
