@@ -1672,13 +1672,10 @@ a.sign-in:hover{
   text-decoration: none;
 }
 .blocks-item-internal {
-  background-color: transparent;
-  border: 1px solid #ddd;
 }
 .blocks-item-internal .icon-lock {
-  height: 15px;
-  width: 15px;
-  bottom: 5px;
+  height: 12px;
+  width: 12px;
   position: relative;
 }
 .blocks-item-internal a {
@@ -1710,6 +1707,9 @@ a.sign-in:hover{
   margin-bottom: 0;
   font-size: clamp(1.4rem, 4vw, 1.5rem);
   line-height: 1.2;
+  display: inline-flex;
+ 	align-items: center;
+  gap: 4px;
 }
 .blocks-item-description {
   margin: 0;
